@@ -28,6 +28,11 @@
   const fileLoadInput = document.getElementById("file-load");
   const titleInput = document.getElementById("titleInput");
 
+  // --- 年表示用要素 ---
+  const yearHamusata = document.getElementById("year-hamusata");
+  const yearHamuzon = document.getElementById("year-hamuzon");
+  const baseYear = 2025;
+
   // ピクセル生成
   for(let i=0; i<WIDTH*HEIGHT; i++){
     const pixel = document.createElement("div");
@@ -368,6 +373,24 @@
     const pad = n => n.toString().padStart(2,"0");
     return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}_${pad(dt.getHours())}-${pad(dt.getMinutes())}-${pad(dt.getSeconds())}`;
   }
+
+  // --- 年表示処理 ---
+  window.addEventListener("DOMContentLoaded", () => {
+    const currentYear = new Date().getFullYear();
+    const yearDisplay = currentYear > baseYear ? `${baseYear}~${currentYear}` : `${baseYear}`;
+
+    if(yearHamusata) yearHamusata.textContent = yearDisplay;
+    if(yearHamuzon) yearHamuzon.textContent = yearDisplay;
+
+    // ここで必要なら表示切替もできます（例: ドメイン別表示切替）
+    // if(location.hostname === "github.com") {
+    //   document.getElementById("footer-hamusata").style.display = "none";
+    //   document.getElementById("footer-hamuzon").style.display = "inline";
+    // } else {
+    //   document.getElementById("footer-hamusata").style.display = "inline";
+    //   document.getElementById("footer-hamuzon").style.display = "none";
+    // }
+  });
 
   createPalette();
 })();
