@@ -1,3 +1,4 @@
+/* ===== 基本スタイル ===== */
 body {
   background: #008080;
   font-family: "MS Gothic", monospace;
@@ -8,6 +9,7 @@ body {
   padding: 20px;
   box-sizing: border-box;
 }
+
 main.window {
   background: #c0c0c0;
   border: 2px solid #000;
@@ -19,12 +21,14 @@ main.window {
   flex-direction: column;
   gap: 1rem;
 }
+
 h1 {
   font-weight: normal;
   color: #000080;
   text-shadow: 1px 1px 0 #fff;
   margin: 0 auto 1rem;
 }
+
 #titleContainer {
   display: flex;
   align-items: center;
@@ -32,12 +36,14 @@ h1 {
   flex-wrap: wrap;
   justify-content: center;
 }
+
 #title-label {
   font-weight: bold;
   color: #000080;
   text-shadow: 1px 1px #fff;
   user-select: none;
 }
+
 #titleInput {
   font-family: "MS Gothic", monospace;
   font-size: 1rem;
@@ -47,12 +53,15 @@ h1 {
   max-width: 100%;
   box-sizing: border-box;
 }
+
+/* ===== 描画エリア ===== */
 #app-container {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
   justify-content: center;
 }
+
 #palette {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
@@ -63,6 +72,7 @@ h1 {
   min-width: 140px;
   max-width: 100%;
 }
+
 .color-btn {
   width: 36px;
   height: 36px;
@@ -72,11 +82,13 @@ h1 {
   background-clip: padding-box;
   border-radius: 0;
 }
+
 .color-btn.selected {
   border-style: inset;
   outline: 2px solid #000080;
   outline-offset: 1px;
 }
+
 .color-btn.transparent {
   background:
     repeating-linear-gradient(
@@ -88,6 +100,7 @@ h1 {
     );
   position: relative;
 }
+
 .color-btn.transparent::after {
   content: "T";
   position: absolute;
@@ -97,6 +110,7 @@ h1 {
   color: black;
   user-select: none;
 }
+
 #canvas {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(24px, 1fr));
@@ -107,6 +121,7 @@ h1 {
   aspect-ratio: 1 / 1;
   touch-action: none;
 }
+
 .pixel {
   width: 24px;
   height: 24px;
@@ -116,9 +131,12 @@ h1 {
   box-sizing: border-box;
   transition: background-color 0.15s ease;
 }
+
 .pixel:hover {
   filter: brightness(0.85);
 }
+
+/* ===== 操作ボタン ===== */
 #controls {
   margin-top: 1rem;
   text-align: center;
@@ -127,6 +145,7 @@ h1 {
   gap: 8px;
   justify-content: center;
 }
+
 #controls button {
   margin: 0;
   padding: 6px 16px;
@@ -139,14 +158,18 @@ h1 {
   flex-grow: 1;
   max-width: 200px;
 }
+
 #controls button:active {
   border-style: inset;
   background: #c0c0c0;
 }
+
 #controls button:focus-visible {
   outline: 2px solid #000080;
   outline-offset: 2px;
 }
+
+/* ===== レスポンシブ ===== */
 @media (max-width: 480px) {
   #palette {
     grid-template-columns: repeat(auto-fit, minmax(28px, 1fr));
@@ -165,4 +188,22 @@ h1 {
     height: 20px;
     border-width: 1px;
   }
+}
+
+/* ===== フッター コピーライト ===== */
+footer {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  color: #333;
+  user-select: none;
+}
+
+#footer-hamusata,
+#footer-hamuzon {
+  display: inline-block;
+}
+
+#footer-hamuzon {
+  margin-left: 8px;
 }
