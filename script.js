@@ -382,15 +382,5 @@
     if(yearHamusata) yearHamusata.textContent = yearDisplay;
     if(yearHamuzon) yearHamuzon.textContent = yearDisplay;
 
-    // ここで必要なら表示切替もできます（例: ドメイン別表示切替）
-    // if(location.hostname === "github.com") {
-    //   document.getElementById("footer-hamusata").style.display = "none";
-    //   document.getElementById("footer-hamuzon").style.display = "inline";
-    // } else {
-    //   document.getElementById("footer-hamusata").style.display = "inline";
-    //   document.getElementById("footer-hamuzon").style.display = "none";
-    // }
-  });
-
   createPalette();
 })();
