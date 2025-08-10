@@ -28,10 +28,10 @@
   const fileLoadInput = document.getElementById("file-load");
   const titleInput = document.getElementById("titleInput");
 
-  // --- 年表示用要素 ---
-  const yearHamusata = document.getElementById("year-hamusata");
-  const yearHamuzon = document.getElementById("year-hamuzon");
+  // --- コピーライト用要素 ---
+  const copyrightSpan = document.getElementById("copyright-text");
   const baseYear = 2025;
+  const appName = "Pixel Drawing";
 
   // ピクセル生成
   for(let i=0; i<WIDTH*HEIGHT; i++){
@@ -54,23 +54,6 @@
       paletteEl.appendChild(btn);
       if(i === currentColorIndex) btn.classList.add("selected");
     });
-  }
-
-  // パレット更新（読み込み時用）
-  function updatePaletteUI(newPalette){
-    paletteEl.innerHTML = "";
-    newPalette.forEach((color, i) => {
-      const btn = document.createElement("div");
-      btn.className = "color-btn";
-      btn.style.backgroundColor = color;
-      btn.title = `色: ${color}`;
-      btn.addEventListener("click", () => selectColor(i, btn));
-      paletteEl.appendChild(btn);
-      if(i === currentColorIndex) btn.classList.add("selected");
-    });
-    // palette配列も更新
-    palette.length = 0;
-    newPalette.forEach(c => palette.push(c));
   }
 
   function selectColor(index, btnEl){
@@ -374,13 +357,19 @@
     return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}_${pad(dt.getHours())}-${pad(dt.getMinutes())}-${pad(dt.getSeconds())}`;
   }
 
-  // --- 年表示処理 ---
+  // コピーライト表示更新
   window.addEventListener("DOMContentLoaded", () => {
     const currentYear = new Date().getFullYear();
-    const yearDisplay = currentYear > baseYear ? `${baseYear}~${currentYear}` : `${baseYear}`;
-
-    if(yearHamusata) yearHamusata.textContent = yearDisplay;
-    if(yearHamuzon) yearHamuzon.textContent = yearDisplay;
+    let text = "© ";
+    if(currentYear === baseYear){
+      text += `${baseYear} ${appName}. All rights reserved.`;
+    } else {
+      text += `${baseYear} - ${currentYear} ${appName}. All rights reserved.`;
+    }
+    if(copyrightSpan){
+      copyrightSpan.textContent = text;
+    }
+  });
 
   createPalette();
 })();
