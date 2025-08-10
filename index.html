@@ -32,16 +32,6 @@
   </footer>
 
   <script src="script.js" defer></script>
-  <script>
-    const baseYear = 2025;
-    const currentYear = new Date().getFullYear();
-    const copyrightEl = document.getElementById("copyright");
-
-    if(currentYear === baseYear){
-      copyrightEl.textContent = `© ${baseYear} Pixel Drawing. All rights reserved.`;
-    } else {
-      copyrightEl.textContent = `© ${baseYear}-${currentYear} Pixel Drawing. All rights reserved.`;
-    }
   </script>
 </body>
 </html>
