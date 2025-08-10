@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pixel Drawing</title>
-  <!-- Windows 98風CSS -->
   <link rel="stylesheet" href="https://unpkg.com/98.css" />
-  <!-- カスタムCSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -30,16 +28,20 @@
   </main>
 
   <footer style="text-align:center; margin-top:15px; font-size:14px;">
-    <span id="footer-hamusata">
-      &copy; <span id="year-hamusata"></span>
-      <a href="https://home.hamusata.f5.si" target="_blank" rel="noopener noreferrer">@hamusata</a>
-    </span>
-    <span id="footer-hamuzon" style="display:none; margin-left: 8px;">
-      &copy; <span id="year-hamuzon"></span>
-      <a href="https://github.com/Hamuzon" target="_blank" rel="noopener noreferrer">@hamuzon</a>
-    </span>
+    <small id="copyright"></small>
   </footer>
 
   <script src="script.js" defer></script>
+  <script>
+    const baseYear = 2025;
+    const currentYear = new Date().getFullYear();
+    const copyrightEl = document.getElementById("copyright");
+
+    if(currentYear === baseYear){
+      copyrightEl.textContent = `© ${baseYear} Pixel Drawing. All rights reserved.`;
+    } else {
+      copyrightEl.textContent = `© ${baseYear}-${currentYear} Pixel Drawing. All rights reserved.`;
+    }
+  </script>
 </body>
 </html>
