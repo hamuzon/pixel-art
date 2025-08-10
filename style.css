@@ -1,6 +1,7 @@
+/* 全体のベース */
 body {
   background: #008080;
-  font-family: "MS Gothic", monospace;
+  font-family: "MS Gothic", monospace, monospace;
   user-select: none;
   margin: 0;
   display: flex;
@@ -9,6 +10,7 @@ body {
   box-sizing: border-box;
 }
 
+/* メインウィンドウ */
 main.window {
   background: #c0c0c0;
   border: 2px solid #000;
@@ -21,6 +23,7 @@ main.window {
   gap: 1rem;
 }
 
+/* タイトル */
 h1 {
   font-weight: normal;
   color: #000080;
@@ -28,6 +31,7 @@ h1 {
   margin: 0 auto 1rem;
 }
 
+/* 作品名入力 */
 #titleContainer {
   display: flex;
   align-items: center;
@@ -53,6 +57,7 @@ h1 {
   box-sizing: border-box;
 }
 
+/* アプリコンテナ */
 #app-container {
   display: flex;
   flex-wrap: wrap;
@@ -60,6 +65,7 @@ h1 {
   justify-content: center;
 }
 
+/* 色パレット */
 #palette {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
@@ -109,9 +115,10 @@ h1 {
   user-select: none;
 }
 
+/* キャンバス */
 #canvas {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(24px, 1fr));
+  grid-template-columns: repeat(16, 24px);
   grid-gap: 2px;
   border: 2px outset buttonface;
   background-color: #c0c0c0;
@@ -134,6 +141,7 @@ h1 {
   filter: brightness(0.85);
 }
 
+/* 操作ボタン */
 #controls {
   margin-top: 1rem;
   text-align: center;
@@ -166,6 +174,7 @@ h1 {
   outline-offset: 2px;
 }
 
+/* フッター */
 footer {
   margin-top: 15px;
   text-align: center;
@@ -174,6 +183,7 @@ footer {
   user-select: none;
 }
 
+/* モバイル対応 */
 @media (max-width: 480px) {
   #palette {
     grid-template-columns: repeat(auto-fit, minmax(28px, 1fr));
