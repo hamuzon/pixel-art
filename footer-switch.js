@@ -25,7 +25,7 @@
     footerHamuzon.style.display = "inline";
     linkHamuzon.href = "https://github.com/Hamuzon";
     linkHamuzon.textContent = "@hamuzon";
-  } else if (host === "pixel-art.hamuzon-jp.f5.si") {
+  } else if (host === "hamuzon-jp.f5.si") {
     footerHamuzon.style.display = "inline";
     linkHamuzon.href = "https://hamuzon-jp.f5.si";
     linkHamuzon.textContent = "@hamuzon";
