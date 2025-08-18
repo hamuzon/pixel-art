@@ -1,7 +1,7 @@
 # Pixel Drawing Code
 
 [link-1](https://pixel-art.hamusata.f5.si/)  
-[link-2](https://hamuzon.github.io/pixel/)
+[link-2](https://hamuzon.github.io/pixel-art/)
 
 ---
 
