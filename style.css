@@ -74,7 +74,7 @@ h1 {
   padding: 8px;
   background: #c0c0c0;
   min-width: 140px;
-  max-width: 100%; 
+  max-width: 100%;
 }
 
 .color-btn {
@@ -118,7 +118,7 @@ h1 {
 /* キャンバス */
 #canvas {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(20px, 1fr)); 
+  grid-template-columns: repeat(16, 24px);
   grid-gap: 2px;
   border: 2px outset buttonface;
   background-color: #c0c0c0;
@@ -194,12 +194,12 @@ footer {
     height: 28px;
   }
   #canvas {
-    grid-template-columns: repeat(auto-fit, minmax(16px, 1fr));
+    grid-template-columns: repeat(16, 20px);
     grid-gap: 1px;
   }
   .pixel {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-width: 1px;
   }
 }
