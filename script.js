@@ -1,10 +1,12 @@
 (() => {
+  // --- 定数 ---
   const SUPPORTED_VERSIONS = ["1.0", "1.1"];
   const APP_NAME = "PixelDraw";
   const APP_VERSION = "1.1";
   const WIDTH = 16;
   const HEIGHT = 16;
 
+  // --- パレット（初期値） ---
   let palette = [
     "#000000",
     "#ff0000",
@@ -15,9 +17,11 @@
     "#00000000" // 透明
   ];
 
+  // --- 状態 ---
   let currentColorIndex = 0;
   let isDrawing = false;
 
+  // --- 要素取得 ---
   const paletteEl = document.getElementById("palette");
   const addColorBtn = document.getElementById("btn-add-color");
   const canvasEl = document.getElementById("canvas");
@@ -28,7 +32,7 @@
   const fileLoadInput = document.getElementById("file-load");
   const titleInput = document.getElementById("titleInput");
 
-  // ピクセル生成
+  // --- ピクセル生成 ---
   for (let i = 0; i < WIDTH * HEIGHT; i++) {
     const pixel = document.createElement("div");
     pixel.classList.add("pixel");
@@ -37,7 +41,7 @@
     canvasEl.appendChild(pixel);
   }
 
-  // パレット生成
+  // --- パレット生成 ---
   function createPalette() {
     paletteEl.innerHTML = "";
     palette.forEach((color, i) => {
@@ -52,12 +56,14 @@
     });
   }
 
+  // --- 色選択 ---
   function selectColor(index, btnEl) {
     currentColorIndex = index;
     paletteEl.querySelectorAll(".color-btn").forEach(b => b.classList.remove("selected"));
     btnEl.classList.add("selected");
   }
 
+  // --- 新しい色追加 ---
   addColorBtn.addEventListener("click", () => {
     const input = document.createElement("input");
     input.type = "color";
@@ -72,6 +78,7 @@
     });
   });
 
+  // --- ピクセル塗り ---
   function paintPixel(pixel) {
     pixel.style.backgroundColor = palette[currentColorIndex];
     pixel.dataset.colorIndex = currentColorIndex;
@@ -81,6 +88,7 @@
     saveToLocalStorage();
   }
 
+  // --- マウス描画イベント ---
   canvasEl.addEventListener("mousedown", e => {
     if (!e.target.classList.contains("pixel")) return;
     isDrawing = true;
@@ -97,6 +105,7 @@
 
   window.addEventListener("mouseup", () => { isDrawing = false; });
 
+  // --- ボードリセット ---
   resetBtn.addEventListener("click", () => {
     if (confirm("本当にボードをリセットして全てクリアしますか？")) {
       canvasEl.querySelectorAll(".pixel").forEach(p => {
@@ -108,8 +117,10 @@
     }
   });
 
+  // --- JSON保存 ---
   saveBtn.addEventListener("click", downloadJson);
 
+  // --- JSON読み込み ---
   loadBtn.addEventListener("click", () => {
     fileLoadInput.value = null;
     fileLoadInput.click();
@@ -143,6 +154,7 @@
     reader.readAsText(file);
   });
 
+  // --- ページロード時に保存データ復元 ---
   window.addEventListener("load", () => {
     const saved = localStorage.getItem("pixelDrawingData-v1");
     if (saved) {
@@ -160,6 +172,79 @@
 
   titleInput.addEventListener("input", saveToLocalStorage);
 
+  // --- 画像保存 ---
+  imgSaveBtn.addEventListener("click", () => {
+    const formats = ["png", "jpeg"];
+    const oldSelect = document.getElementById("img-format-select");
+    if (oldSelect) oldSelect.remove();
+
+    const select = document.createElement("select");
+    select.id = "img-format-select";
+    formats.forEach(f => {
+      const option = document.createElement("option");
+      option.value = f;
+      option.textContent = f.toUpperCase();
+      select.appendChild(option);
+    });
+
+    const saveBtn = document.createElement("button");
+    saveBtn.textContent = "保存";
+    saveBtn.style.marginLeft = "8px";
+
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "fixed";
+    wrapper.style.top = "50%";
+    wrapper.style.left = "50%";
+    wrapper.style.transform = "translate(-50%, -50%)";
+    wrapper.style.background = "#c0c0c0";
+    wrapper.style.border = "2px outset buttonface";
+    wrapper.style.padding = "12px";
+    wrapper.style.zIndex = "9999";
+    wrapper.appendChild(select);
+    wrapper.appendChild(saveBtn);
+    document.body.appendChild(wrapper);
+
+    saveBtn.addEventListener("click", () => {
+      saveImage(select.value);
+      wrapper.remove();
+    });
+
+    wrapper.addEventListener("click", (e) => {
+      if (e.target === wrapper) wrapper.remove();
+    });
+  });
+
+  function saveImage(format) {
+    const cvs = document.createElement("canvas");
+    cvs.width = WIDTH;
+    cvs.height = HEIGHT;
+    const ctx = cvs.getContext("2d");
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    canvasEl.querySelectorAll(".pixel").forEach((p, i) => {
+      const bg = p.style.backgroundColor;
+      if (bg && bg !== palette[palette.length - 1]) {
+        const x = i % WIDTH;
+        const y = Math.floor(i / WIDTH);
+        ctx.fillStyle = bg;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    });
+    const mime = format === "jpeg" ? "image/jpeg" : "image/png";
+    cvs.toBlob(blob => downloadBlob(blob, `${APP_NAME}-${APP_VERSION}_${getTimestamp()}.${format}`), mime, 0.92);
+  }
+
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // --- ローカルストレージ保存 ---
   function saveToLocalStorage() {
     const data = {
       app: APP_NAME,
@@ -234,5 +319,12 @@
     alert("作品を保存しました。");
   }
 
+  function getTimestamp() {
+    const dt = new Date();
+    const pad = n => n.toString().padStart(2, "0");
+    return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}_${pad(dt.getHours())}-${pad(dt.getMinutes())}-${pad(dt.getSeconds())}`;
+  }
+
+  // --- 初期化 ---
   createPalette();
 })();
