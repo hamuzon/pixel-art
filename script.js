@@ -28,6 +28,7 @@
   const resetBtn = document.getElementById("btn-reset");
   const saveBtn = document.getElementById("btn-save");
   const loadBtn = document.getElementById("btn-load");
+  const imgSaveBtn = document.getElementById("btn-img-save");
   const fileLoadInput = document.getElementById("file-load");
   const titleInput = document.getElementById("titleInput");
 
@@ -48,7 +49,7 @@
       btn.className = "color-btn";
       btn.style.backgroundColor = color;
       btn.title = `色: ${color}`;
-      if (color === "#00000000") btn.classList.add("transparent");
+      if (color === "transparent" || color === "#00000000") btn.classList.add("transparent");
       btn.addEventListener("click", () => selectColor(i, btn));
       paletteEl.appendChild(btn);
       if (i === currentColorIndex) btn.classList.add("selected");
@@ -62,7 +63,7 @@
     btnEl.classList.add("selected");
   }
 
-  // --- 色追加 ---
+  // --- 色追加（選択保持版） ---
   addColorBtn.addEventListener("click", () => {
     const input = document.createElement("input");
     input.type = "color";
@@ -71,15 +72,13 @@
     input.style.left = "-9999px";
     document.body.appendChild(input);
 
-    input.addEventListener("input", () => {
-      palette.splice(palette.length - 1, 0, input.value);
-      createPalette();
-      currentColorIndex = palette.length - 2; // 選択状態に
-      selectColor(currentColorIndex, paletteEl.children[currentColorIndex]);
-      saveToLocalStorage();
-    });
-
+    // 色を選んで閉じたときに追加
     input.addEventListener("change", () => {
+      const newColor = input.value;
+      // 透明の前に追加
+      palette.splice(palette.length - 1, 0, newColor);
+      createPalette();
+      saveToLocalStorage();
       document.body.removeChild(input);
     });
 
@@ -111,7 +110,9 @@
     }
   });
 
-  window.addEventListener("mouseup", () => { isDrawing = false; });
+  window.addEventListener("mouseup", () => {
+    isDrawing = false;
+  });
 
   // --- ボードリセット ---
   resetBtn.addEventListener("click", () => {
@@ -126,7 +127,7 @@
   });
 
   // --- JSON保存 ---
-  saveBtn.addEventListener("click", () => { downloadJson(); });
+  saveBtn.addEventListener("click", downloadJson);
 
   // --- JSON読み込み ---
   loadBtn.addEventListener("click", () => {
@@ -190,7 +191,7 @@
   });
 
   // --- 作品名変更で保存 ---
-  titleInput.addEventListener("input", () => saveToLocalStorage());
+  titleInput.addEventListener("input", saveToLocalStorage);
 
   // --- ローカルストレージ保存 ---
   function saveToLocalStorage() {
