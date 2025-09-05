@@ -11,14 +11,20 @@
 <body>
   <main class="window" role="main" aria-label="ピクセルお絵かきアプリ">
     <h1>Pixel Drawing</h1>
+
     <div id="titleContainer">
       <label id="title-label" for="titleInput">作品名（任意）:</label>
       <input type="text" id="titleInput" placeholder="作品名を入力してください" autocomplete="off" />
     </div>
+
     <section id="app-container" aria-label="描画エリアとパレット">
       <nav id="palette" role="list" aria-label="色パレット"></nav>
+      <!-- ★ 色追加ボタンを設置 -->
+      <button id="btn-add-color" type="button">色を追加</button>
+
       <div id="canvas" role="grid" aria-label="ピクセル描画キャンバス" tabindex="0"></div>
     </section>
+
     <section id="controls" aria-label="操作ボタン">
       <button id="btn-reset" type="button">ボードをリセット</button>
       <button id="btn-save" type="button">JSONで保存</button>
