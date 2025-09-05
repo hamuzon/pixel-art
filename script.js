@@ -63,7 +63,7 @@
     btnEl.classList.add("selected");
   }
 
-  // --- 色追加（透明の後に追加） ---
+  // --- 色追加（選択保持版） ---
   addColorBtn.addEventListener("click", () => {
     const input = document.createElement("input");
     input.type = "color";
@@ -72,10 +72,11 @@
     input.style.left = "-9999px";
     document.body.appendChild(input);
 
+    // 色を選んで閉じたときに追加
     input.addEventListener("change", () => {
       const newColor = input.value;
-      // 透明の次に追加
-      palette.splice(palette.length, 0, newColor);
+      // 透明の前に追加
+      palette.splice(palette.length - 1, 0, newColor);
       createPalette();
       saveToLocalStorage();
       document.body.removeChild(input);
