@@ -1,10 +1,12 @@
 (() => {
+  // --- 定数 ---
   const SUPPORTED_VERSIONS = ["1.0", "1.1"];
   const APP_NAME = "PixelDraw";
   const APP_VERSION = "1.1";
   const WIDTH = 16;
   const HEIGHT = 16;
 
+  // --- パレット（初期値） ---
   let palette = [
     "#000000",
     "#ff0000",
@@ -15,9 +17,11 @@
     "#00000000" // 透明
   ];
 
+  // --- 状態 ---
   let currentColorIndex = 0;
   let isDrawing = false;
 
+  // --- 要素取得 ---
   const paletteEl = document.getElementById("palette");
   const addColorBtn = document.getElementById("btn-add-color");
   const canvasEl = document.getElementById("canvas");
@@ -68,7 +72,6 @@
     document.body.appendChild(input);
 
     input.addEventListener("input", () => {
-      // 透明の前に追加
       palette.splice(palette.length - 1, 0, input.value);
       createPalette();
       currentColorIndex = palette.length - 2; // 選択状態に
@@ -94,14 +97,14 @@
   }
 
   // --- マウス操作 ---
-  canvasEl.addEventListener("mousedown", e => {
+  canvasEl.addEventListener("mousedown", (e) => {
     if (!e.target.classList.contains("pixel")) return;
     isDrawing = true;
     paintPixel(e.target);
     onDrawChange();
   });
 
-  canvasEl.addEventListener("mouseover", e => {
+  canvasEl.addEventListener("mouseover", (e) => {
     if (isDrawing && e.target.classList.contains("pixel")) {
       paintPixel(e.target);
       onDrawChange();
@@ -123,7 +126,7 @@
   });
 
   // --- JSON保存 ---
-  saveBtn.addEventListener("click", downloadJson);
+  saveBtn.addEventListener("click", () => { downloadJson(); });
 
   // --- JSON読み込み ---
   loadBtn.addEventListener("click", () => {
@@ -131,23 +134,27 @@
     fileLoadInput.click();
   });
 
-  fileLoadInput.addEventListener("change", e => {
+  fileLoadInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (!file) return alert("ファイルが選択されていません。");
     if (!file.name.endsWith(".json")) return alert("JSONファイルを選択してください。");
 
     const reader = new FileReader();
-    reader.onload = ev => {
+    reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target.result);
-        if (data.app !== APP_NAME) { alert("このデータはこのアプリのものではありません。"); return; }
+        if (data.app !== APP_NAME) return alert("このデータはこのアプリのものではありません。");
         if (!SUPPORTED_VERSIONS.includes(data.version)) {
-          alert(`サポートされていないバージョンです。\n対応: ${SUPPORTED_VERSIONS.join(", ")}\n読み込んだ: ${data.version}`);
-          return;
+          return alert(`非対応バージョンです。対応: ${SUPPORTED_VERSIONS.join(", ")}, 読込: ${data.version}`);
         }
-        if (data.width !== WIDTH || data.height !== HEIGHT) { alert("キャンバスサイズが異なります。"); return; }
-        if (!Array.isArray(data.pixels)) { alert("ピクセルデータが不正です。"); return; }
-        if (Array.isArray(data.palette)) { palette = data.palette; createPalette(); }
+        if (data.width !== WIDTH || data.height !== HEIGHT) return alert("キャンバスサイズが異なります。");
+        if (!Array.isArray(data.pixels)) return alert("ピクセルデータが不正です。");
+
+        if (Array.isArray(data.palette)) {
+          palette = data.palette;
+          createPalette();
+        }
+
         fillCanvasWithCompressedPixels(data.pixels);
         titleInput.value = data.title || "";
         saveToLocalStorage();
@@ -165,9 +172,16 @@
     if (saved) {
       try {
         const data = JSON.parse(saved);
-        if (data.app === APP_NAME && SUPPORTED_VERSIONS.includes(data.version) &&
-            data.width === WIDTH && data.height === HEIGHT && Array.isArray(data.pixels)) {
-          if (Array.isArray(data.palette)) { palette = data.palette; createPalette(); }
+        if (data.app === APP_NAME &&
+          SUPPORTED_VERSIONS.includes(data.version) &&
+          data.width === WIDTH &&
+          data.height === HEIGHT &&
+          Array.isArray(data.pixels)) {
+
+          if (Array.isArray(data.palette)) {
+            palette = data.palette;
+            createPalette();
+          }
           fillCanvasWithCompressedPixels(data.pixels);
           titleInput.value = data.title || "";
         }
@@ -175,7 +189,8 @@
     }
   });
 
-  titleInput.addEventListener("input", saveToLocalStorage);
+  // --- 作品名変更で保存 ---
+  titleInput.addEventListener("input", () => saveToLocalStorage());
 
   // --- ローカルストレージ保存 ---
   function saveToLocalStorage() {
@@ -186,17 +201,48 @@
       height: HEIGHT,
       title: titleInput.value.trim() || undefined,
       palette,
-      pixels: compressPixels(getCanvasColorIndices())
+      pixels: compressPixels(getCanvasColorIndices()),
     };
     localStorage.setItem("pixelDrawingData-v1", JSON.stringify(data));
   }
 
-  function getCanvasColorIndices() {
-    return Array.from(canvasEl.querySelectorAll(".pixel")).map(p =>
-      p.dataset.colorIndex !== undefined ? Number(p.dataset.colorIndex) : palette.length - 1
-    );
+  // --- JSONダウンロード ---
+  function downloadJson() {
+    const data = {
+      app: APP_NAME,
+      version: APP_VERSION,
+      width: WIDTH,
+      height: HEIGHT,
+      title: titleInput.value.trim() || undefined,
+      palette,
+      pixels: compressPixels(getCanvasColorIndices()),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const dt = new Date();
+    const pad = n => n.toString().padStart(2, "0");
+    const filename = `${APP_NAME}-VERSION-${APP_VERSION}_${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}_${pad(dt.getHours())}-${pad(dt.getMinutes())}-${pad(dt.getSeconds())}.json`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert("作品を保存しました。");
   }
 
+  // --- キャンバスの色インデックス取得 ---
+  function getCanvasColorIndices() {
+    const indices = [];
+    canvasEl.querySelectorAll(".pixel").forEach(p => {
+      const idx = p.dataset.colorIndex !== undefined ? Number(p.dataset.colorIndex) : palette.length - 1;
+      indices.push(idx);
+    });
+    return indices;
+  }
+
+  // --- ピクセル配列圧縮 ---
   function compressPixels(indices) {
     const compressed = [];
     let i = 0;
@@ -204,12 +250,19 @@
       const current = indices[i];
       let count = 1;
       while (i + count < indices.length && indices[i + count] === current) count++;
-      if (count >= 3) { compressed.push([i, count]); compressed.push(current); i += count; }
-      else { for (let j = 0; j < count; j++) compressed.push(current); i += count; }
+      if (count >= 3) {
+        compressed.push([i, count]);
+        compressed.push(current);
+        i += count;
+      } else {
+        for (let j = 0; j < count; j++) compressed.push(current);
+        i += count;
+      }
     }
     return compressed;
   }
 
+  // --- 圧縮ピクセルを展開 ---
   function fillCanvasWithCompressedPixels(pixels) {
     const indices = [];
     for (let i = 0; i < pixels.length; i++) {
@@ -224,33 +277,13 @@
     for (let i = 0; i < WIDTH * HEIGHT; i++) {
       const idx = indices[i] !== undefined ? indices[i] : palette.length - 1;
       const pixel = canvasEl.querySelector(`.pixel[data-index="${i}"]`);
-      if (pixel) { pixel.style.backgroundColor = palette[idx]; pixel.dataset.colorIndex = idx; }
+      if (pixel) {
+        pixel.style.backgroundColor = palette[idx];
+        pixel.dataset.colorIndex = idx;
+      }
     }
   }
 
-  function downloadJson() {
-    const data = {
-      app: APP_NAME,
-      version: APP_VERSION,
-      width: WIDTH,
-      height: HEIGHT,
-      title: titleInput.value.trim() || undefined,
-      palette,
-      pixels: compressPixels(getCanvasColorIndices())
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const dt = new Date();
-    const pad = n => n.toString().padStart(2, "0");
-    const filename = `${APP_NAME}-VERSION-${APP_VERSION}_${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}_${pad(dt.getHours())}-${pad(dt.getMinutes())}-${pad(dt.getSeconds())}.json`;
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
-    alert("作品を保存しました。");
-  }
-
+  // --- 初期化 ---
   createPalette();
 })();
