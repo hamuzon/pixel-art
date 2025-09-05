@@ -8,41 +8,125 @@
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="https://home.hamusata.f5.si/icon.svg" type="image/svg+xml">
 <style>
-#palette{display:flex;flex-wrap:wrap;margin-bottom:10px}
-.color-btn{width:32px;height:32px;margin:2px;border:1px solid #999;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.color-btn.selected{outline:3px solid #333}
-.color-btn span{font-size:14px;color:red;position:absolute;top:-6px;right:-6px;display:none}
-.color-btn.deletable span{display:block}
-#canvas{display:grid;grid-template-columns:repeat(16,20px);grid-template-rows:repeat(16,20px);gap:1px;margin-bottom:10px}
-.pixel{width:20px;height:20px;background-color:#0000;border:1px solid #ccc}
+body {
+  margin: 0;
+  padding: 10px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+#palette {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.color-btn {
+  width: 28px;
+  height: 28px;
+  margin: 2px;
+  border: 1px solid #999;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.color-btn.selected {
+  outline: 2px solid #333;
+}
+
+.color-btn span {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 12px;
+  color: red;
+  display: none;
+}
+
+.color-btn.deletable span {
+  display: block;
+}
+
+#canvas {
+  display: grid;
+  grid-template-columns: repeat(16, 20px);
+  grid-template-rows: repeat(16, 20px);
+  gap: 1px;
+  margin-bottom: 10px;
+}
+
+.pixel {
+  width: 20px;
+  height: 20px;
+  background-color: #0000;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 4px 8px;
+  font-size: 14px;
+  margin: 2px;
+  cursor: pointer;
+}
+
+#app-container, #controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+@media(max-width: 400px) {
+  #canvas {
+    transform: scale(0.8);
+    transform-origin: top left;
+  }
+}
 </style>
 </head>
 <body>
 <main class="window" role="main" aria-label="ピクセルお絵かきアプリ">
 <h1>Pixel Drawing</h1>
+
 <div id="titleContainer">
-<label id="title-label" for="titleInput">作品名（任意）:</label>
-<input type="text" id="titleInput" placeholder="作品名を入力してください" autocomplete="off">
+  <label for="titleInput">作品名（任意）:</label>
+  <input type="text" id="titleInput" placeholder="作品名を入力してください" autocomplete="off">
 </div>
+
 <section id="app-container" aria-label="描画エリアとパレット">
-<nav id="palette" role="list" aria-label="色パレット"></nav>
-<button id="btn-add-color" type="button">色を追加</button>
-<button id="btn-reset-palette" type="button">パレット初期化</button>
-<div id="canvas" role="grid" aria-label="ピクセル描画キャンバス" tabindex="0"></div>
+  <nav id="palette" role="list" aria-label="色パレット"></nav>
+  <button id="btn-add-color" type="button">色追加</button>
+  <button id="btn-reset-palette" type="button">パレット初期化</button>
+  <div id="canvas" role="grid" aria-label="ピクセル描画キャンバス" tabindex="0"></div>
 </section>
+
 <section id="controls" aria-label="操作ボタン">
-<button id="btn-reset" type="button">ボードをリセット</button>
-<button id="btn-save" type="button">JSONで保存</button>
-<button id="btn-load" type="button">JSON読み込み</button>
-<button id="btn-img-save" type="button">画像保存</button>
-<input type="file" id="file-load" accept=".json" style="display:none">
+  <button id="btn-reset" type="button">ボードリセット</button>
+  <button id="btn-save" type="button">JSON保存</button>
+  <button id="btn-load" type="button">JSON読み込み</button>
+  <button id="btn-img-save" type="button">画像保存</button>
+  <input type="file" id="file-load" accept=".json" style="display:none">
 </section>
-<footer style="text-align:center;margin-top:15px;font-size:14px;user-select:none;">
-<span id="footer-hamusata" style="display:none;">&copy; <span id="year-hamusata"></span> Pixel Drawing. All rights reserved. <a href="https://home.hamusata.f5.si" target="_blank" rel="noopener noreferrer">@hamusata</a></span>
-<span id="footer-hamuzon" style="display:none;">&copy; <span id="year-hamuzon"></span> Pixel Drawing. All rights reserved. <a id="link-hamuzon" href="https://github.com/Hamuzon" target="_blank" rel="noopener noreferrer">@hamuzon</a></span>
-<span id="footer-other" style="display:none;">&copy; <span id="year-other"></span> Pixel Drawing. All rights reserved.</span>
+
+<footer style="text-align:center;margin-top:10px;font-size:12px;user-select:none;">
+  <span id="footer-hamusata" style="display:none;">
+    &copy; <span id="year-hamusata"></span> Pixel Drawing 
+    <a href="https://home.hamusata.f5.si" target="_blank" rel="noopener noreferrer">@hamusata</a>
+  </span>
+  <span id="footer-hamuzon" style="display:none;">
+    &copy; <span id="year-hamuzon"></span> Pixel Drawing 
+    <a href="https://github.com/Hamuzon" target="_blank" rel="noopener noreferrer">@hamuzon</a>
+  </span>
+  <span id="footer-other" style="display:none;">
+    &copy; <span id="year-other"></span> Pixel Drawing
+  </span>
 </footer>
 </main>
+
 <script src="script.js" defer></script>
 <script src="footer-switch.js" defer></script>
 </body>
