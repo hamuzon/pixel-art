@@ -32,192 +32,232 @@
     const pixel = document.createElement("div");
     pixel.classList.add("pixel");
     pixel.dataset.index = i;
-    pixel.style.backgroundColor = "#ffffff";
+    pixel.style.backgroundColor = palette[palette.length - 1];
     canvasEl.appendChild(pixel);
   }
 
-  function renderPalette() {
+  function createPalette() {
     paletteEl.innerHTML = "";
-    palette.forEach((color, index) => {
-      const swatch = document.createElement("div");
-      swatch.classList.add("swatch");
-      if (index === currentColorIndex) {
-        swatch.classList.add("selected");
-      }
-      swatch.style.backgroundColor = color;
-      swatch.dataset.index = index;
-      swatch.addEventListener("click", () => {
-        currentColorIndex = index;
-        renderPalette();
-      });
-      const del = document.createElement("button");
-      del.textContent = "🗑️";
-      del.classList.add("delete-btn");
-      del.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (confirm("この色を削除しますか？")) {
-          palette.splice(index, 1);
-          if (currentColorIndex >= palette.length) currentColorIndex = palette.length - 1;
-          if (currentColorIndex < 0) currentColorIndex = 0;
-          renderPalette();
-        }
-      });
-      swatch.appendChild(del);
-      paletteEl.appendChild(swatch);
+    palette.forEach((color, i) => {
+      const btn = document.createElement("div");
+      btn.className = "color-btn";
+      btn.style.backgroundColor = color;
+      btn.title = `色: ${color}`;
+      if (color === "transparent" || color === "#00000000") btn.classList.add("transparent");
+      btn.addEventListener("click", () => selectColor(i, btn));
+      paletteEl.appendChild(btn);
+      if (i === currentColorIndex) btn.classList.add("selected");
     });
   }
 
-  function resetPalette() {
-    if (confirm("パレットを初期状態に戻しますか？")) {
-      palette = [
-        "#000000",
-        "#ff0000",
-        "#00ff00",
-        "#0000ff",
-        "#ffff00",
-        "#ffffff",
-        "#00000000"
-      ];
-      currentColorIndex = 0;
-      renderPalette();
-    }
+  function selectColor(index, btnEl) {
+    currentColorIndex = index;
+    paletteEl.querySelectorAll(".color-btn").forEach(b => b.classList.remove("selected"));
+    btnEl.classList.add("selected");
   }
 
   addColorBtn.addEventListener("click", () => {
-    const picker = document.createElement("input");
-    picker.type = "color";
-    picker.value = "#000000";
-    picker.style.position = "absolute";
-    picker.style.left = "-9999px";
-    document.body.appendChild(picker);
-    picker.addEventListener("input", (e) => {
-      const newColor = e.target.value;
-      if (!palette.includes(newColor)) {
-        palette.push(newColor);
-        renderPalette();
-      }
+    const input = document.createElement("input");
+    input.type = "color";
+    input.value = "#ffffff";
+    input.style.position = "fixed";
+    input.style.left = "-9999px";
+    document.body.appendChild(input);
+
+    input.addEventListener("change", () => {
+      const newColor = input.value;
+      palette.splice(palette.length - 1, 0, newColor); // 透明の前に追加
+      createPalette();
+      saveToLocalStorage();
+      document.body.removeChild(input);
     });
-    picker.addEventListener("change", () => {
-      document.body.removeChild(picker);
-    });
-    picker.click();
+
+    input.click();
   });
 
   function paintPixel(pixel) {
-    if (pixel && pixel.classList.contains("pixel")) {
-      pixel.style.backgroundColor = palette[currentColorIndex];
-    }
+    pixel.style.backgroundColor = palette[currentColorIndex];
+    pixel.dataset.colorIndex = currentColorIndex;
   }
 
-  // マウス描画
+  function onDrawChange() {
+    saveToLocalStorage();
+  }
+
   canvasEl.addEventListener("mousedown", (e) => {
-    if (e.target.classList.contains("pixel")) {
-      isDrawing = true;
-      paintPixel(e.target);
-    }
+    if (!e.target.classList.contains("pixel")) return;
+    isDrawing = true;
+    paintPixel(e.target);
+    onDrawChange();
   });
+
   canvasEl.addEventListener("mouseover", (e) => {
     if (isDrawing && e.target.classList.contains("pixel")) {
       paintPixel(e.target);
+      onDrawChange();
     }
   });
-  document.addEventListener("mouseup", () => {
-    isDrawing = false;
-  });
 
-  // タッチ描画（スマホ対応）
   canvasEl.addEventListener("touchstart", (e) => {
     e.preventDefault();
     const touch = e.touches[0];
     const target = document.elementFromPoint(touch.clientX, touch.clientY);
     if (target && target.classList.contains("pixel")) {
-      isDrawing = true;
       paintPixel(target);
+      onDrawChange();
     }
-  });
+  }, { passive: false });
+
   canvasEl.addEventListener("touchmove", (e) => {
     e.preventDefault();
-    if (!isDrawing) return;
-    const touch = e.touches[0];
-    const target = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (target && target.classList.contains("pixel")) {
-      paintPixel(target);
+    for (let touch of e.touches) {
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (target && target.classList.contains("pixel")) {
+        paintPixel(target);
+        onDrawChange();
+      }
     }
+  }, { passive: false });
+
+  window.addEventListener("mouseup", () => {
+    isDrawing = false;
   });
-  document.addEventListener("touchend", () => {
+
+  window.addEventListener("touchend", () => {
     isDrawing = false;
   });
 
   resetBtn.addEventListener("click", () => {
-    if (confirm("キャンバスをリセットしますか？")) {
-      Array.from(canvasEl.children).forEach((p) => {
-        p.style.backgroundColor = "#ffffff";
+    if (confirm("本当にボードをリセットして全てクリアしますか？")) {
+      canvasEl.querySelectorAll(".pixel").forEach(p => {
+        p.style.backgroundColor = palette[palette.length - 1];
+        delete p.dataset.colorIndex;
       });
-      resetPalette();
+      localStorage.removeItem("pixelDrawingData-v1");
+      titleInput.value = "";
     }
   });
 
-  saveBtn.addEventListener("click", () => {
-    const data = {
-      app: APP_NAME,
-      version: APP_VERSION,
-      title: titleInput.value,
-      palette: palette,
-      pixels: Array.from(canvasEl.children).map((p) => p.style.backgroundColor)
-    };
-    const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "pixel.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
+  saveBtn.addEventListener("click", downloadJson);
 
   loadBtn.addEventListener("click", () => {
+    fileLoadInput.value = null;
     fileLoadInput.click();
   });
+
   fileLoadInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) return alert("ファイルが選択されていません。");
+    if (!file.name.endsWith(".json")) return alert("JSONファイルを選択してください.");
+
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target.result);
-        if (data.app !== APP_NAME || !SUPPORTED_VERSIONS.includes(data.version)) {
-          alert("対応していないデータです");
-          return;
+        if (data.app !== APP_NAME) return alert("このデータはこのアプリのものではありません。");
+        if (!SUPPORTED_VERSIONS.includes(data.version)) {
+          return alert(`非対応バージョンです。対応: ${SUPPORTED_VERSIONS.join(", ")}, 読込: ${data.version}`);
         }
+        if (data.width !== WIDTH || data.height !== HEIGHT) return alert("キャンバスサイズが異なります。");
+        if (!Array.isArray(data.pixels)) return alert("ピクセルデータが不正です。");
+
+        if (Array.isArray(data.palette)) {
+          palette = data.palette;
+          createPalette();
+        }
+
+        fillCanvas(data.pixels);
         titleInput.value = data.title || "";
-        palette = data.palette || palette;
-        renderPalette();
-        Array.from(canvasEl.children).forEach((p, i) => {
-          p.style.backgroundColor = data.pixels[i] || "#ffffff";
-        });
+        saveToLocalStorage();
+        alert(`バージョン ${data.version} の作品を読み込みました。`);
       } catch {
-        alert("読み込みに失敗しました");
+        alert("JSONファイルの読み込みに失敗しました。");
       }
     };
     reader.readAsText(file);
   });
 
-  imgSaveBtn.addEventListener("click", () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
-    const ctx = canvas.getContext("2d");
-    Array.from(canvasEl.children).forEach((p, i) => {
-      const x = i % WIDTH;
-      const y = Math.floor(i / WIDTH);
-      ctx.fillStyle = p.style.backgroundColor || "#ffffff";
-      ctx.fillRect(x, y, 1, 1);
-    });
-    const url = canvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "pixel.png";
-    a.click();
+  window.addEventListener("load", () => {
+    const saved = localStorage.getItem("pixelDrawingData-v1");
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.app === APP_NAME &&
+            SUPPORTED_VERSIONS.includes(data.version) &&
+            data.width === WIDTH &&
+            data.height === HEIGHT &&
+            Array.isArray(data.pixels)) {
+
+          if (Array.isArray(data.palette)) {
+            palette = data.palette;
+            createPalette();
+          }
+          fillCanvas(data.pixels);
+          titleInput.value = data.title || "";
+        }
+      } catch {}
+    }
   });
 
-  renderPalette();
+  titleInput.addEventListener("input", saveToLocalStorage);
+
+  function saveToLocalStorage() {
+    const data = {
+      app: APP_NAME,
+      version: APP_VERSION,
+      width: WIDTH,
+      height: HEIGHT,
+      title: titleInput.value.trim() || undefined,
+      palette,
+      pixels: getCanvasColorIndices(),
+    };
+    localStorage.setItem("pixelDrawingData-v1", JSON.stringify(data));
+  }
+
+  function downloadJson() {
+    const data = {
+      app: APP_NAME,
+      version: APP_VERSION,
+      width: WIDTH,
+      height: HEIGHT,
+      title: titleInput.value.trim() || undefined,
+      palette,
+      pixels: getCanvasColorIndices(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const dt = new Date();
+    const pad = n => n.toString().padStart(2, "0");
+    const filename = `${APP_NAME}-VERSION-${APP_VERSION}_${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}_${pad(dt.getHours())}-${pad(dt.getMinutes())}-${pad(dt.getSeconds())}.json`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert("作品を保存しました。");
+  }
+
+  function getCanvasColorIndices() {
+    const indices = [];
+    canvasEl.querySelectorAll(".pixel").forEach(p => {
+      const idx = p.dataset.colorIndex !== undefined ? Number(p.dataset.colorIndex) : palette.length - 1;
+      indices.push(idx);
+    });
+    return indices;
+  }
+
+  function fillCanvas(pixels) {
+    for (let i = 0; i < WIDTH * HEIGHT; i++) {
+      const idx = pixels[i] !== undefined ? pixels[i] : palette.length - 1;
+      const pixel = canvasEl.querySelector(`.pixel[data-index="${i}"]`);
+      if (pixel) {
+        pixel.style.backgroundColor = palette[idx];
+        pixel.dataset.colorIndex = idx;
+      }
+    }
+  }
+
+  createPalette();
 })();
