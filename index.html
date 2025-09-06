@@ -1,52 +1,42 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pixel Drawing</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pixel Drawing - top</title>
   <link rel="stylesheet" href="https://unpkg.com/98.css" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="https://home.hamusata.f5.si/icon.svg" type="image/svg+xml" />
+  <link rel="icon" href="https://hamusata.f5.si/icon.svg" type="image/svg+xml" />
 </head>
 <body>
-  <main class="window" role="main" aria-label="ピクセルお絵かきアプリ">
+  <main class="window" role="main" aria-label="Pixel Drawing トップページ">
 
-    <h1>Pixel Drawing</h1>
+    <!-- タイトル -->
+    <h1>
+      <span class="title-part">Pixel</span>
+      <span class="title-part">Drawing</span>
+      <span class="subtitle">- top</span>
+    </h1>
 
-    <div id="titleContainer">
-      <label id="title-label" for="titleInput">作品名（任意）:</label>
-      <input type="text" id="titleInput" placeholder="作品名を入力してください" autocomplete="off" />
+    <p>バージョンを選択してください:</p>
+
+    <!-- バージョンリンク -->
+    <div id="version-links">
+      <a class="btn" href="./v1.0/index.html">v1.0 を開く</a>
+      <a class="btn" href="./v1.1/index.html">v1.1 を開く</a>
     </div>
 
-    <section id="app-container" aria-label="描画エリアとパレット">
+    <!-- 更新情報 -->
+    <div id="update-info">
+      <p class="update-info">v1.0: 正式版初回リリース。JSONで保存・読み込み、画像保存 PNG/JPEG、作品名指定可能、色固定。</p>
+      <p class="update-info">v1.1: COLOR 追加対応。削除はボードをリセットか保存JSONデータ編集のみ。</p>
+    </div>
 
-      <!-- 🎨 パレット領域 -->
-      <nav id="palette" role="list" aria-label="色パレット"></nav>
-
-      <!-- ➕ 色追加ボタン -->
-      <button id="btn-add-color" type="button">色を追加</button>
-
-      <!-- 🖌️ キャンバス -->
-      <div id="canvas" role="grid" aria-label="ピクセル描画キャンバス" tabindex="0"></div>
-
-    </section>
-
-    <section id="controls" aria-label="操作ボタン">
-
-      <button id="btn-reset" type="button">ボードをリセット</button>
-      <button id="btn-save" type="button">JSONで保存</button>
-      <button id="btn-load" type="button">JSON読み込み</button>
-      <button id="btn-img-save" type="button">画像保存</button>
-
-      <!-- 📂 ファイル選択は非表示 -->
-      <input type="file" id="file-load" accept=".json" style="display:none" />
-
-    </section>
-
+    <!-- フッター -->
     <footer>
       <span id="footer-hamusata" style="display:none;">
         &copy; <span id="year-hamusata"></span> Pixel Drawing. All rights reserved.
-        <a href="https://home.hamusata.f5.si" target="_blank" rel="noopener noreferrer">@hamusata</a>
+        <a href="https://hamusata.f5.si" target="_blank" rel="noopener noreferrer">@hamusata</a>
       </span>
 
       <span id="footer-hamuzon" style="display:none;">
@@ -61,7 +51,6 @@
 
   </main>
 
-  <script src="script.js" defer></script>
   <script src="footer-switch.js" defer></script>
 </body>
 </html>

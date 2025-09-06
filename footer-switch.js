@@ -5,31 +5,38 @@
 
   const host = location.hostname.toLowerCase();
 
-  const footerHamusata = document.getElementById("footer-hamusata");
-  const footerHamuzon = document.getElementById("footer-hamuzon");
-  const footerOther = document.getElementById("footer-other");
+  const footers = {
+    hamusata: document.getElementById("footer-hamusata"),
+    hamuzon: document.getElementById("footer-hamuzon"),
+    other: document.getElementById("footer-other"),
+  };
 
-  const yearHamusata = document.getElementById("year-hamusata");
-  const yearHamuzon = document.getElementById("year-hamuzon");
-  const yearOther = document.getElementById("year-other");
+  const years = {
+    hamusata: document.getElementById("year-hamusata"),
+    hamuzon: document.getElementById("year-hamuzon"),
+    other: document.getElementById("year-other"),
+  };
 
-  yearHamusata.textContent = yearDisplay;
-  yearHamuzon.textContent = yearDisplay;
-  yearOther.textContent = yearDisplay;
+  Object.values(years).forEach(el => { if(el) el.textContent = yearDisplay; });
 
   const linkHamuzon = document.getElementById("link-hamuzon");
 
+  // 表示条件
   if (host === "pixel-art.hamusata.f5.si" || host === "home.hamusata.f5.si") {
-    footerHamusata.style.display = "inline";
+    if (footers.hamusata) footers.hamusata.style.display = "inline";
   } else if (host === "hamuzon.github.io") {
-    footerHamuzon.style.display = "inline";
-    linkHamuzon.href = "https://github.com/Hamuzon";
-    linkHamuzon.textContent = "@hamuzon";
+    if (footers.hamuzon) footers.hamuzon.style.display = "inline";
+    if (linkHamuzon) {
+      linkHamuzon.href = "https://github.com/Hamuzon";
+      linkHamuzon.textContent = "@hamuzon";
+    }
   } else if (host === "hamuzon-jp.f5.si") {
-    footerHamuzon.style.display = "inline";
-    linkHamuzon.href = "https://hamuzon-jp.f5.si";
-    linkHamuzon.textContent = "@hamuzon";
+    if (footers.hamuzon) footers.hamuzon.style.display = "inline";
+    if (linkHamuzon) {
+      linkHamuzon.href = "https://hamuzon-jp.f5.si";
+      linkHamuzon.textContent = "@hamuzon";
+    }
   } else {
-    footerOther.style.display = "inline";
+    if (footers.other) footers.other.style.display = "inline";
   }
 })();

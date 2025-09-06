@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixel Drawing - v1.1</title>
+  <link rel="stylesheet" href="https://unpkg.com/98.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="https://home.hamusata.f5.si/icon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <main class="window" role="main" aria-label="ピクセルお絵かきアプリ">
+
+    <h1>Pixel Drawing - v1.1</h1>
+
+    <div id="titleContainer">
+      <label id="title-label" for="titleInput">作品名（任意）:</label>
+      <input type="text" id="titleInput" placeholder="作品名を入力してください" autocomplete="off" />
+    </div>
+
+    <section id="app-container" aria-label="描画エリアとパレット">
+
+      <!-- 🎨 パレット領域 -->
+      <nav id="palette" role="list" aria-label="色パレット"></nav>
+
+      <!-- ➕ 色追加ボタン -->
+      <button id="btn-add-color" type="button">色を追加</button>
+
+      <!-- 🖌️ キャンバス -->
+      <div id="canvas" role="grid" aria-label="ピクセル描画キャンバス" tabindex="0"></div>
+
+    </section>
+
+    <section id="controls" aria-label="操作ボタン">
+
+      <button id="btn-reset" type="button">ボードをリセット</button>
+      <button id="btn-save" type="button">JSONで保存</button>
+      <button id="btn-load" type="button">JSON読み込み</button>
+      <button id="btn-img-save" type="button">画像保存</button>
+
+      <!-- 📂 ファイル選択は非表示 -->
+      <input type="file" id="file-load" accept=".json" style="display:none" />
+
+    </section>
+
+    <footer>
+      <span id="footer-hamusata" style="display:none;">
+        &copy; <span id="year-hamusata"></span> v1.1 Pixel Drawing. All rights reserved.
+        <a href="https://home.hamusata.f5.si" target="_blank" rel="noopener noreferrer">@hamusata</a>
+      </span>
+
+      <span id="footer-hamuzon" style="display:none;">
+        &copy; <span id="year-hamuzon"></span> v1.1 Pixel Drawing. All rights reserved.
+        <a id="link-hamuzon" href="https://github.com/Hamuzon" target="_blank" rel="noopener noreferrer">@hamuzon</a>
+      </span>
+
+      <span id="footer-other" style="display:none;">
+        &copy; <span id="year-other"></span> v1.1 Pixel Drawing. All rights reserved.
+      </span>
+    </footer>
+
+  </main>
+
+  <script src="script.js" defer></script>
+  <script src="footer-switch.js" defer></script>
+</body>
+</html>
