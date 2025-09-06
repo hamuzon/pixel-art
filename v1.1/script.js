@@ -150,7 +150,7 @@
         p.style.backgroundColor = palette[palette.length - 1];
         delete p.dataset.colorIndex;
       });
-      localStorage.removeItem("pixelDrawingData-v1");
+      localStorage.removeItem("pixelDrawingData-v1.1");
       titleInput.value = "";
     }
   });
@@ -194,7 +194,7 @@
 
   // --- ページロード時に保存データ復元 ---
   window.addEventListener("load", () => {
-    const saved = localStorage.getItem("pixelDrawingData-v1");
+    const saved = localStorage.getItem("pixelDrawingData-v1.1");
     if (saved) {
       try {
         const data = JSON.parse(saved);
@@ -293,7 +293,7 @@
       palette,
       pixels: compressPixels(getCanvasColorIndices())
     };
-    localStorage.setItem("pixelDrawingData-v1", JSON.stringify(data));
+    localStorage.setItem("pixelDrawingData-v1.1", JSON.stringify(data));
   }
 
   function getCanvasColorIndices() {
