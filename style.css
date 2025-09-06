@@ -28,7 +28,9 @@ h1 {
   font-weight: normal;
   color: #000080;
   text-shadow: 1px 1px 0 #fff;
-  margin-bottom: 1rem;
+  margin: 0 auto 1rem;
+  text-align: center;
+  width: 100%;
 }
 
 h1 .title-part,
@@ -41,6 +43,7 @@ h1 .subtitle {
   font-size: 0.8em;
   margin-left: 0.3rem;
 }
+
 
 /* バージョンリンク */
 #version-links {
@@ -84,6 +87,48 @@ footer {
   font-size: 14px;
   color: #000080;
   user-select: none;
+}
+
+/* スマホ対応 */
+@media (max-width: 480px) {
+  h1 .title-part,
+  h1 .subtitle {
+    display: block;
+    margin-left: 0;
+  }
+
+  #version-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  #version-links a.btn {
+    width: 100%;
+    max-width: 100%;
+    min-width: auto;
+    padding: 0.5rem 0;
+  }
+}
+
+/* スマホ対応 */
+@media (max-width: 480px) {
+  h1 .title-part,
+  h1 .subtitle {
+    display: block;
+    margin-left: 0;
+  }
+
+  #version-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  #version-links a.btn {
+    width: 100%;
+    max-width: 100%;
+    min-width: auto;
+    padding: 0.5rem 0;
+  }
 }
 
 /* スマホ対応 */

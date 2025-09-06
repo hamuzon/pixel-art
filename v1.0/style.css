@@ -29,6 +29,19 @@ h1 {
   color: #000080;
   text-shadow: 1px 1px 0 #fff;
   margin: 0 auto 1rem;
+  text-align: center;
+  width: 100%;
+}
+
+h1 .title-part,
+h1 .subtitle {
+  display: inline;
+}
+
+h1 .subtitle {
+  font-weight: normal;
+  font-size: 0.8em;
+  margin-left: 0.3rem;
 }
 
 /* 作品名入力 */
@@ -94,14 +107,7 @@ h1 {
 }
 
 .color-btn.transparent {
-  background:
-    repeating-linear-gradient(
-      45deg,
-      #ccc,
-      #ccc 4px,
-      #fff 4px,
-      #fff 8px
-    );
+  background: repeating-linear-gradient(45deg, #ccc, #ccc 4px, #fff 4px, #fff 8px);
   position: relative;
 }
 
@@ -201,5 +207,26 @@ footer {
     width: 20px;
     height: 20px;
     border-width: 1px;
+  }
+}
+
+/* スマホ対応 */
+@media (max-width: 480px) {
+  h1 .title-part,
+  h1 .subtitle {
+    display: block;
+    margin-left: 0;
+  }
+
+  #version-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  #version-links a.btn {
+    width: 100%;
+    max-width: 100%;
+    min-width: auto;
+    padding: 0.5rem 0;
   }
 }

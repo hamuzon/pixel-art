@@ -1,4 +1,6 @@
-/* 全体のベース */
+/* ============================= */
+/* 全体のベーススタイル         */
+/* ============================= */
 body {
   background: #008080;
   font-family: "MS Gothic", monospace, monospace;
@@ -10,7 +12,9 @@ body {
   box-sizing: border-box;
 }
 
-/* メインウィンドウ */
+/* ============================= */
+/* メインウィンドウ               */
+/* ============================= */
 main.window {
   background: #c0c0c0;
   border: 2px solid #000;
@@ -23,15 +27,32 @@ main.window {
   gap: 1rem;
 }
 
-/* タイトル */
+/* ============================= */
+/* タイトル                       */
+/* ============================= */
 h1 {
   font-weight: normal;
   color: #000080;
   text-shadow: 1px 1px 0 #fff;
   margin: 0 auto 1rem;
+  text-align: center;
+  width: 100%;
 }
 
-/* 作品名入力 */
+h1 .title-part,
+h1 .subtitle {
+  display: inline;
+}
+
+h1 .subtitle {
+  font-weight: normal;
+  font-size: 0.8em;
+  margin-left: 0.3rem;
+}
+
+/* ============================= */
+/* 作品名入力                     */
+/* ============================= */
 #titleContainer {
   display: flex;
   align-items: center;
@@ -57,7 +78,9 @@ h1 {
   box-sizing: border-box;
 }
 
-/* アプリコンテナ */
+/* ============================= */
+/* アプリコンテナ                 */
+/* ============================= */
 #app-container {
   display: flex;
   flex-wrap: wrap;
@@ -65,7 +88,9 @@ h1 {
   justify-content: center;
 }
 
-/* 色パレット */
+/* ============================= */
+/* 色パレット                     */
+/* ============================= */
 #palette {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
@@ -94,14 +119,7 @@ h1 {
 }
 
 .color-btn.transparent {
-  background:
-    repeating-linear-gradient(
-      45deg,
-      #ccc,
-      #ccc 4px,
-      #fff 4px,
-      #fff 8px
-    );
+  background: repeating-linear-gradient(45deg, #ccc, #ccc 4px, #fff 4px, #fff 8px);
   position: relative;
 }
 
@@ -115,7 +133,9 @@ h1 {
   user-select: none;
 }
 
-/* キャンバス */
+/* ============================= */
+/* キャンバス                     */
+/* ============================= */
 #canvas {
   display: grid;
   grid-template-columns: repeat(16, 24px);
@@ -141,7 +161,9 @@ h1 {
   filter: brightness(0.85);
 }
 
-/* 操作ボタン */
+/* ============================= */
+/* 操作ボタン                     */
+/* ============================= */
 #controls {
   margin-top: 1rem;
   text-align: center;
@@ -174,7 +196,9 @@ h1 {
   outline-offset: 2px;
 }
 
-/* フッター */
+/* ============================= */
+/* フッター                       */
+/* ============================= */
 footer {
   margin-top: 15px;
   text-align: center;
@@ -183,20 +207,47 @@ footer {
   user-select: none;
 }
 
-/* モバイル対応 */
+/* ============================= */
+/* モバイル対応                   */
+/* ============================= */
 @media (max-width: 480px) {
+  /* タイトルを縦並びに */
+  h1 .title-part,
+  h1 .subtitle {
+    display: block;
+    margin-left: 0;
+  }
+
+  /* バージョンリンク調整 */
+  #version-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  #version-links a.btn {
+    width: 100%;
+    max-width: 100%;
+    min-width: auto;
+    padding: 0.5rem 0;
+  }
+
+  /* パレットサイズ調整 */
   #palette {
     grid-template-columns: repeat(auto-fit, minmax(28px, 1fr));
     min-width: 100px;
   }
+
   .color-btn {
     width: 28px;
     height: 28px;
   }
+
+  /* キャンバスサイズ調整 */
   #canvas {
     grid-template-columns: repeat(16, 20px);
     grid-gap: 1px;
   }
+
   .pixel {
     width: 20px;
     height: 20px;
