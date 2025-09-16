@@ -2,7 +2,7 @@
   // --- 定数 ---
   const SUPPORTED_VERSIONS = ["1.0", "1.1", "2.0"];
   const APP_NAME = "PixelDraw";
-  const APP_VERSION = "2.0"; 
+  const APP_VERSION = "2.0";
   const WIDTH = 16;
   const HEIGHT = 16;
 
@@ -29,306 +29,166 @@
   const saveBtn = document.getElementById("btn-save");
   const loadBtn = document.getElementById("btn-load");
   const imgSaveBtn = document.getElementById("btn-img-save");
-  const fileLoadInput = document.getElementById("file-load");
+  const fileLoadEl = document.getElementById("file-load");
   const titleInput = document.getElementById("titleInput");
 
-  // --- ピクセル生成 ---
-  for (let i = 0; i < WIDTH * HEIGHT; i++) {
-    const pixel = document.createElement("div");
-    pixel.classList.add("pixel");
-    pixel.dataset.index = i;
-    pixel.style.backgroundColor = palette[palette.length - 1];
-    canvasEl.appendChild(pixel);
-  }
+  // --- キャンバス初期化 ---
+  function initCanvas() {
+    canvasEl.innerHTML = "";
+    canvasEl.style.display = "grid";
+    canvasEl.style.gridTemplateColumns = `repeat(${WIDTH}, 20px)`;
+    canvasEl.style.gridTemplateRows = `repeat(${HEIGHT}, 20px)`;
 
-  // --- パレット生成 ---
-  function createPalette() {
-    paletteEl.innerHTML = "";
-    palette.forEach((color, i) => {
-      const btn = document.createElement("div");
-      btn.className = "color-btn";
-      btn.style.backgroundColor = color;
-      btn.title = `色: ${color}`;
-      if (color === "#00000000") btn.classList.add("transparent");
-      btn.addEventListener("click", () => selectColor(i, btn));
-      paletteEl.appendChild(btn);
-      if (i === currentColorIndex) btn.classList.add("selected");
-    });
+    for (let i = 0; i < WIDTH * HEIGHT; i++) {
+      const pixel = document.createElement("div");
+      pixel.className = "pixel";
+      pixel.dataset.colorIndex = "-1";
+      pixel.style.backgroundColor = "transparent";
+      pixel.addEventListener("mousedown", () => drawPixel(pixel));
+      pixel.addEventListener("mouseenter", () => {
+        if (isDrawing) drawPixel(pixel);
+      });
+      canvasEl.appendChild(pixel);
+    }
   }
-
-  // --- 色選択 ---
-  function selectColor(index, btnEl) {
-    currentColorIndex = index;
-    paletteEl.querySelectorAll(".color-btn").forEach(b => b.classList.remove("selected"));
-    btnEl.classList.add("selected");
-  }
-
-  // --- 新しい色追加（スマホ対応） ---
-  addColorBtn.addEventListener("click", () => {
-    const input = document.createElement("input");
-    input.type = "color";
-    input.value = "#ffffff";
-    input.style.position = "fixed";
-    input.style.left = "-9999px";
-    document.body.appendChild(input);
-    input.addEventListener("change", () => {
-      palette.splice(palette.length - 1, 0, input.value);
-      createPalette();
-      saveToLocalStorage();
-      document.body.removeChild(input);
-    });
-    input.click();
-  });
 
   // --- ピクセル塗り ---
-  function paintPixel(pixel) {
-    pixel.style.backgroundColor = palette[currentColorIndex];
+  function drawPixel(pixel) {
     pixel.dataset.colorIndex = currentColorIndex;
+    pixel.style.backgroundColor = palette[currentColorIndex];
   }
 
-  function onDrawChange() {
-    saveToLocalStorage();
-  }
-
-  // --- マウス描画イベント ---
-  canvasEl.addEventListener("mousedown", e => {
-    if (!e.target.classList.contains("pixel")) return;
-    isDrawing = true;
-    paintPixel(e.target);
-    onDrawChange();
-  });
-
-  canvasEl.addEventListener("mouseover", e => {
-    if (isDrawing && e.target.classList.contains("pixel")) {
-      paintPixel(e.target);
-      onDrawChange();
-    }
-  });
-
-  window.addEventListener("mouseup", () => { isDrawing = false; });
-
-  // --- タッチ描画イベント ---
-  canvasEl.addEventListener("touchstart", e => {
-    e.preventDefault();
-    Array.from(e.touches).forEach(touch => {
-      const target = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (target && target.classList.contains("pixel")) paintPixel(target);
-    });
-    onDrawChange();
-  });
-
-  canvasEl.addEventListener("touchmove", e => {
-    e.preventDefault();
-    Array.from(e.touches).forEach(touch => {
-      const target = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (target && target.classList.contains("pixel")) paintPixel(target);
-    });
-    onDrawChange();
-  });
-
-  canvasEl.addEventListener("touchend", () => { isDrawing = false; });
-
-  // --- ボードリセット ---
-  resetBtn.addEventListener("click", () => {
-    if (confirm("本当にボードをリセットして全てクリアしますか？")) {
-      canvasEl.querySelectorAll(".pixel").forEach(p => {
-        p.style.backgroundColor = palette[palette.length - 1];
-        delete p.dataset.colorIndex;
+  // --- パレット描画 ---
+  function renderPalette() {
+    paletteEl.innerHTML = "";
+    palette.forEach((color, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "color-btn";
+      btn.style.backgroundColor = color;
+      btn.setAttribute("aria-label", `色 ${idx + 1}`);
+      if (idx === currentColorIndex) {
+        btn.classList.add("selected");
+      }
+      btn.addEventListener("click", () => {
+        currentColorIndex = idx;
+        renderPalette();
       });
-      localStorage.removeItem("pixelDrawingData-v2.0");
-      titleInput.value = "";
-    }
-  });
-
-  // --- JSON保存 ---
-  saveBtn.addEventListener("click", downloadJson);
-
-  // --- JSON読み込み ---
-  loadBtn.addEventListener("click", () => {
-    fileLoadInput.value = null;
-    fileLoadInput.click();
-  });
-
-  fileLoadInput.addEventListener("change", e => {
-    const file = e.target.files[0];
-    if (!file) return alert("ファイルが選択されていません。");
-    if (!file.name.endsWith(".json")) return alert("JSONファイルを選択してください。");
-
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (data.app !== APP_NAME) return alert("このデータはこのアプリのものではありません。");
-        if (!SUPPORTED_VERSIONS.includes(data.version)) {
-          return alert(`非対応のバージョンです。\n対応: ${SUPPORTED_VERSIONS.join(", ")}\n読み込んだ: ${data.version}`);
-        }
-        if (data.width !== WIDTH || data.height !== HEIGHT) return alert("キャンバスサイズが異なります。");
-
-        // v1.0 / v1.1 → v2.0 に変換
-        let loadedPalette = Array.isArray(data.palette) ? data.palette : palette;
-        let pixelIndices = [];
-
-        if (data.version === "1.0") {
-          // v1.0 = 生配列
-          pixelIndices = data.pixels;
-        } else if (data.version === "1.1") {
-          // v1.1 = RLE 圧縮配列
-          pixelIndices = decompressPixels(data.pixels);
-        } else if (data.version === "2.0") {
-          pixelIndices = decompressPixels(data.pixels);
-        }
-
-        palette = loadedPalette;
-        createPalette();
-        fillCanvasWithIndices(pixelIndices);
-        titleInput.value = data.title || "";
-        saveToLocalStorage();
-        alert(`バージョン ${data.version} の作品を読み込みました。`);
-      } catch {
-        alert("JSONファイルの読み込みに失敗しました。");
-      }
-    };
-    reader.readAsText(file);
-  });
-
-  // --- ページロード時に保存データ復元 ---
-  window.addEventListener("load", () => {
-    const saved = localStorage.getItem("pixelDrawingData-v2.0");
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        if (data.app === APP_NAME && data.version === "2.0") {
-          palette = data.palette;
-          createPalette();
-          fillCanvasWithIndices(decompressPixels(data.pixels));
-          titleInput.value = data.title || "";
-        }
-      } catch {}
-    }
-  });
-
-  titleInput.addEventListener("input", saveToLocalStorage);
-
-  // --- 画像保存 ---
-  imgSaveBtn.addEventListener("click", () => saveImage("png"));
-
-  function saveImage(format) {
-    const cvs = document.createElement("canvas");
-    cvs.width = WIDTH;
-    cvs.height = HEIGHT;
-    const ctx = cvs.getContext("2d");
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    canvasEl.querySelectorAll(".pixel").forEach((p, i) => {
-      const bg = p.style.backgroundColor;
-      if (bg && bg !== palette[palette.length - 1]) {
-        const x = i % WIDTH;
-        const y = Math.floor(i / WIDTH);
-        ctx.fillStyle = bg;
-        ctx.fillRect(x, y, 1, 1);
-      }
+      paletteEl.appendChild(btn);
     });
-    const mime = "image/png";
-    cvs.toBlob(blob => downloadBlob(blob, `${APP_NAME}-${APP_VERSION}_${getTimestamp()}.${format}`), mime, 0.92);
   }
 
-  function downloadBlob(blob, filename) {
+  // --- 保存処理 ---
+  function saveData() {
+    const pixels = Array.from(canvasEl.querySelectorAll(".pixel")).map(
+      (p) => parseInt(p.dataset.colorIndex, 10)
+    );
+
+    const data = {
+      app: APP_NAME,
+      version: APP_VERSION, // 常に v2.0 で保存
+      title: titleInput.value || "",
+      palette,
+      width: WIDTH,
+      height: HEIGHT,
+      pixels,
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
+    a.download = `${APP_NAME}-v${APP_VERSION}.json`;
     a.click();
-    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
 
-  // --- ローカルストレージ保存 ---
-  function saveToLocalStorage() {
-    const data = {
-      app: APP_NAME,
-      version: APP_VERSION,
-      width: WIDTH,
-      height: HEIGHT,
-      title: titleInput.value.trim() || undefined,
-      palette,
-      pixels: compressPixels(getCanvasColorIndices())
-    };
-    localStorage.setItem("pixelDrawingData-v2.0", JSON.stringify(data));
-  }
+  // --- 読み込み処理 ---
+  function loadData(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
 
-  function getCanvasColorIndices() {
-    return Array.from(canvasEl.querySelectorAll(".pixel")).map(p =>
-      p.dataset.colorIndex !== undefined ? Number(p.dataset.colorIndex) : palette.length - 1
-    );
-  }
+        if (data.app !== APP_NAME) {
+          alert("対応していないアプリのデータです。");
+          return;
+        }
+        if (!SUPPORTED_VERSIONS.includes(data.version)) {
+          alert(`未対応のバージョンです: ${data.version}`);
+          return;
+        }
 
-  // --- 圧縮（v1.1 / v2.0形式共通 RLE） ---
-  function compressPixels(indices) {
-    const compressed = [];
-    let i = 0;
-    while (i < indices.length) {
-      const current = indices[i];
-      let count = 1;
-      while (i + count < indices.length && indices[i + count] === current) count++;
-      if (count >= 3) { compressed.push([i, count]); compressed.push(current); i += count; }
-      else { for (let j = 0; j < count; j++) compressed.push(current); i += count; }
-    }
-    return compressed;
-  }
+        titleInput.value = data.title || "";
+        palette = data.palette || palette;
+        renderPalette();
 
-  // --- 展開 ---
-  function decompressPixels(pixels) {
-    const indices = [];
-    for (let i = 0; i < pixels.length; i++) {
-      const val = pixels[i];
-      if (Array.isArray(val) && val.length === 2 && typeof pixels[i + 1] === "number") {
-        const [start, count] = val;
-        const colorIndex = pixels[i + 1];
-        for (let c = 0; c < count; c++) indices[start + c] = colorIndex;
-        i++;
-      } else if (typeof val === "number") indices.push(val);
-    }
-    return indices;
-  }
-
-  function fillCanvasWithIndices(indices) {
-    for (let i = 0; i < WIDTH * HEIGHT; i++) {
-      const idx = indices[i] !== undefined ? indices[i] : palette.length - 1;
-      const pixel = canvasEl.querySelector(`.pixel[data-index="${i}"]`);
-      if (pixel) {
-        pixel.style.backgroundColor = palette[idx];
-        pixel.dataset.colorIndex = idx;
+        const pixels = canvasEl.querySelectorAll(".pixel");
+        data.pixels.forEach((colorIndex, i) => {
+          if (pixels[i]) {
+            pixels[i].dataset.colorIndex = colorIndex;
+            pixels[i].style.backgroundColor =
+              palette[colorIndex] || "transparent";
+          }
+        });
+      } catch (err) {
+        alert("読み込みに失敗しました。");
       }
-    }
-  }
-
-  function downloadJson() {
-    const data = {
-      app: APP_NAME,
-      version: APP_VERSION,
-      width: WIDTH,
-      height: HEIGHT,
-      title: titleInput.value.trim() || undefined,
-      palette,
-      pixels: compressPixels(getCanvasColorIndices())
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${APP_NAME}-VERSION-${APP_VERSION}_${getTimestamp()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
-    alert("作品を保存しました。（v2.0形式）");
+    reader.readAsText(file);
   }
 
-  function getTimestamp() {
-    const dt = new Date();
-    const pad = n => n.toString().padStart(2, "0");
-    return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}_${pad(dt.getHours())}-${pad(dt.getMinutes())}-${pad(dt.getSeconds())}`;
+  // --- 画像保存 ---
+  function saveAsImage() {
+    const canvas = document.createElement("canvas");
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+    const ctx = canvas.getContext("2d");
+
+    const pixels = canvasEl.querySelectorAll(".pixel");
+    pixels.forEach((p, i) => {
+      const x = i % WIDTH;
+      const y = Math.floor(i / WIDTH);
+      const colorIndex = parseInt(p.dataset.colorIndex, 10);
+      ctx.fillStyle = palette[colorIndex] || "transparent";
+      ctx.fillRect(x, y, 1, 1);
+    });
+
+    const link = document.createElement("a");
+    link.download = `${APP_NAME}-v${APP_VERSION}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
   }
+
+  // --- リセット ---
+  function resetBoard() {
+    initCanvas();
+  }
+
+  // --- イベント登録 ---
+  addColorBtn.addEventListener("click", () => {
+    const newColor = prompt("追加する色コードを入力してください (例: #123456)");
+    if (newColor) {
+      palette.push(newColor);
+      renderPalette();
+    }
+  });
+
+  resetBtn.addEventListener("click", resetBoard);
+  saveBtn.addEventListener("click", saveData);
+  loadBtn.addEventListener("click", () => fileLoadEl.click());
+  fileLoadEl.addEventListener("change", (e) => {
+    if (e.target.files.length > 0) {
+      loadData(e.target.files[0]);
+    }
+  });
+  imgSaveBtn.addEventListener("click", saveAsImage);
+
+  document.body.addEventListener("mousedown", () => (isDrawing = true));
+  document.body.addEventListener("mouseup", () => (isDrawing = false));
 
   // --- 初期化 ---
-  createPalette();
+  initCanvas();
+  renderPalette();
 })();
