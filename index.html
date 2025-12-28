@@ -3,54 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pixel Drawing - top</title>
+  <title>Pixel Drawing - Top</title>
   <link rel="stylesheet" href="https://unpkg.com/98.css" />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="https://hamusata.f5.si/icon.svg" type="image/svg+xml" />
 </head>
 <body>
-  <main class="window" role="main" aria-label="Pixel Drawing トップページ">
-
-    <!-- タイトル -->
-    <h1>
-      <span class="title-part">Pixel</span>
-      <span class="title-part">Drawing</span>
-      <span class="subtitle">- top</span>
-    </h1>
-
-    <p>バージョンを選択してください:</p>
-
-    <!-- バージョンリンク -->
-    <div id="version-links">
-      <a class="btn" href="./v1.0/index.html">v1.0 を開く</a>
-      <a class="btn" href="./v1.1/index.html">v1.1 を開く</a>
+  <main class="window" role="main">
+    <div class="title-bar">
+      <div class="title-bar-text">Pixel Drawing - Welcome</div>
     </div>
+    <div class="window-body">
+      <header>
+        <h1>
+          <span class="title-part">Pixel</span>
+          <span class="title-part">Drawing</span>
+          <span class="subtitle">- top</span>
+        </h1>
+      </header>
 
-    <!-- 更新情報 -->
-    <div id="update-info">
-      <p class="update-info">v1.0: 正式版初回リリース。JSONで保存・読み込み、画像保存 PNG/JPEG、作品名指定可能、色固定。</p>
-      <p class="update-info">v1.1: COLOR 追加対応。削除はボードをリセットか保存JSONデータ編集のみ。</p>
+      <p>バージョンを選択して起動してください:</p>
+
+      <nav id="version-links">
+        <a class="btn" href="./v1.0/index.html">v1.0 を開く</a>
+        <a class="btn" href="./v1.1/index.html">v1.1 を開く</a>
+        <a class="btn" href="./v2.0/index.html">v2.0 を開く</a>
+      </nav>
+
+      <hr />
+
+      <section id="update-history">
+        <article class="update-info">
+          <strong>v1.0:</strong> 正式版初回リリース。JSON保存・読込、画像保存 PNG/JPEG 対応。
+        </article>
+        <article class="update-info">
+          <strong>v1.1:</strong> COLOR 追加対応。削除はボードリセットか保存JSONデータ編集のみ。
+        </article>
+        <article class="update-info">
+          <strong>v2.0:</strong> パレットの色削除に対応。UIブラッシュアップ、ファイルサイズ縮小、内部コード改良。
+        </article>
+      </section>
+
+      <footer>
+        <div id="footer-content">
+          &copy; <span class="year"></span> Pixel Drawing. All rights reserved.
+          <span id="footer-link-container"></span>
+        </div>
+      </footer>
     </div>
-
-    <!-- フッター -->
-    <footer>
-      <span id="footer-hamusata" style="display:none;">
-        &copy; <span id="year-hamusata"></span> Pixel Drawing. All rights reserved.
-        <a href="https://hamusata.f5.si" target="_blank" rel="noopener noreferrer">@hamusata</a>
-      </span>
-
-      <span id="footer-hamuzon" style="display:none;">
-        &copy; <span id="year-hamuzon"></span> Pixel Drawing. All rights reserved.
-        <a id="link-hamuzon" href="https://github.com/Hamuzon" target="_blank" rel="noopener noreferrer">@hamuzon</a>
-      </span>
-
-      <span id="footer-other" style="display:none;">
-        &copy; <span id="year-other"></span> Pixel Drawing. All rights reserved.
-      </span>
-    </footer>
-
   </main>
-
-  <script src="footer-switch.js" defer></script>
+  <script src="script.js" defer></script>
 </body>
 </html>

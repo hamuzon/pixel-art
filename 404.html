@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>404 Not Found - Pixel Drawing</title>
+  <link rel="stylesheet" href="https://unpkg.com/98.css" />
+  <link rel="icon" href="https://hamusata.f5.si/icon.svg" type="image/svg+xml" />
+  <style>
+    body {
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "MS Gothic", "MS PGothic", monospace;
+      background: #008080;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    main.window {
+      width: 95%;
+      max-width: 450px;
+      min-width: 280px;
+    }
+
+    .window-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.5rem, 15vw, 4.5rem);
+      color: #000;
+      line-height: 1;
+    }
+
+    .message-area {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .message-area p {
+      margin: 0;
+      font-size: clamp(0.9rem, 4vw, 1rem);
+      line-height: 1.6;
+    }
+
+    .subtext {
+      color: #555;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    .back-btn-wrapper {
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .back-btn-wrapper button {
+      min-width: 150px;
+      padding: 6px 24px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 1.5rem;
+      font-size: 11px;
+      color: #555;
+      border-top: 1px solid #808080;
+      padding-top: 12px;
+      width: 100%;
+    }
+
+    footer a {
+      color: #555;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="window" role="alertdialog">
+    <div class="title-bar">
+      <div class="title-bar-text">Error: 404 Not Found</div>
+      <div class="title-bar-controls">
+        <button aria-label="Close" onclick="location.href='/'"></button>
+      </div>
+    </div>
+
+    <div class="window-body">
+      <h1>404</h1>
+
+      <div class="message-area">
+        <p><strong>エラーが発生しました</strong></p>
+        <p>指定されたページは見つかりません。</p>
+        <p class="subtext">Sorry, Not Found.</p>
+      </div>
+
+      <div class="back-btn-wrapper">
+        <button onclick="location.href='/'">トップページへ戻る</button>
+      </div>
+
+      <footer>
+        &copy; <span class="year"></span> Pixel Drawing. All rights reserved.
+        <span id="footer-link-container"></span>
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const startYear = 2025;
+      const currentYear = new Date().getFullYear();
+      
+      let yearDisplay;
+      if (startYear === currentYear) {
+        yearDisplay = `${startYear}`;
+      } else {
+        const min = Math.min(startYear, currentYear);
+        const max = Math.max(startYear, currentYear);
+        yearDisplay = `${min}~${max}`;
+      }
+
+      document.querySelectorAll(".year").forEach(el => {
+        el.textContent = yearDisplay;
+      });
+
+      const host = location.hostname.toLowerCase();
+      const container = document.getElementById("footer-link-container");
+      if (!container) return;
+
+      let linkHref = "";
+      let linkText = "";
+
+      if (host.includes("hamusata.f5.si")) {
+        linkHref = "https://hamusata.f5.si";
+        linkText = "@hamusata";
+      } else if (host === "hamuzon.github.io" || host === "hamuzon-jp.f5.si") {
+        linkHref = (host === "hamuzon.github.io") ? "https://github.com/Hamuzon" : "https://hamuzon-jp.f5.si";
+        linkText = "@hamuzon";
+      }
+
+      if (linkHref) {
+        container.innerHTML = ` <a href="${linkHref}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+      }
+    })();
+  </script>
+</body>
+</html>

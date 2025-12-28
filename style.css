@@ -1,153 +1,99 @@
-/* 全体 */
 body {
   margin: 0;
   padding: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "MS Gothic", monospace;
+  font-family: "MS Gothic", "MS PGothic", monospace;
   background: #008080;
   min-height: 100vh;
   box-sizing: border-box;
 }
 
-/* メインウィンドウ */
 main.window {
   width: 100%;
-  max-width: 600px;
-  padding: 2rem;
+  max-width: 500px;
+}
+
+.window-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
+  padding: 1.5rem;
   text-align: center;
 }
 
-/* タイトル */
 h1 {
-  font-weight: normal;
+  margin: 0;
   color: #000080;
-  text-shadow: 1px 1px 0 #fff;
-  margin: 0 auto 1rem;
-  text-align: center;
-  width: 100%;
-}
-
-h1 .title-part,
-h1 .subtitle {
-  display: inline;
+  font-size: 2rem;
 }
 
 h1 .subtitle {
-  font-weight: normal;
-  font-size: 0.8em;
-  margin-left: 0.3rem;
+  font-size: 0.6em;
+  color: #555;
+  margin-left: 0.5rem;
 }
 
-
-/* バージョンリンク */
 #version-links {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
   gap: 0.8rem;
   width: 100%;
+  max-width: 300px;
 }
 
 #version-links a.btn {
-  display: inline-block;
-  padding: 0.6rem 1.2rem;
-  background: #3399ff;
-  color: #fff;
-  border-radius: 8px;
+  display: block;
+  padding: 0.8rem;
   text-decoration: none;
-  border: 2px outset buttonface;
-  min-width: 120px;
-  text-align: center;
   font-weight: bold;
-  transition: 0.2s;
+  background: silver;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
+  color: black;
 }
 
-#version-links a.btn:hover {
-  background: #1673e6;
+#version-links a.btn:active {
+  box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
 }
 
-/* 更新情報 */
+#version-links a.btn.highlight {
+  background: #000080;
+  color: white;
+}
+
+#update-history {
+  width: 100%;
+  text-align: left;
+  font-size: 0.9rem;
+  background: #fff;
+  padding: 10px;
+  box-shadow: inset 1px 1px #808080, inset -1px -1px #ffffff;
+}
+
 .update-info {
-  max-width: 500px;
-  text-align: center;
-  margin: 0.5rem 0 1rem;
-  color: #000080;
-  font-weight: normal;
+  margin-bottom: 0.5rem;
+  color: #333;
 }
 
-/* フッター */
 footer {
-  margin-top: 2rem;
-  font-size: 14px;
-  color: #000080;
-  user-select: none;
+  margin-top: 1rem;
+  font-size: 12px;
+  border-top: 1px solid #808080;
+  padding-top: 10px;
+  width: 100%;
 }
 
-/* スマホ対応 */
 @media (max-width: 480px) {
-  h1 .title-part,
+  h1 .title-part {
+    display: block;
+  }
   h1 .subtitle {
     display: block;
-    margin-left: 0;
+    margin: 0;
   }
-
-  #version-links {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  #version-links a.btn {
-    width: 100%;
-    max-width: 100%;
-    min-width: auto;
-    padding: 0.5rem 0;
-  }
-}
-
-/* スマホ対応 */
-@media (max-width: 480px) {
-  h1 .title-part,
-  h1 .subtitle {
-    display: block;
-    margin-left: 0;
-  }
-
-  #version-links {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  #version-links a.btn {
-    width: 100%;
-    max-width: 100%;
-    min-width: auto;
-    padding: 0.5rem 0;
-  }
-}
-
-/* スマホ対応 */
-@media (max-width: 480px) {
-  h1 .title-part,
-  h1 .subtitle {
-    display: block;
-    margin-left: 0;
-  }
-
-  #version-links {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  #version-links a.btn {
-    width: 100%;
-    max-width: 100%;
-    min-width: auto;
-    padding: 0.5rem 0;
+  .window-body {
+    padding: 1rem;
   }
 }
