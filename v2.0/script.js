@@ -259,7 +259,7 @@
     // --- 起動処理 ---
     window.onload = () => {
         $("year").textContent = new Date().getFullYear();
-        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("pixelDrawingData-v1.1");
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("pixelDrawingData-v2.0");
         if (saved) {
             try {
                 const d = JSON.parse(saved);
