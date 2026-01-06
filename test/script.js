@@ -1,10 +1,10 @@
 (() => {
     // --- 定数 ---
     const APP_NAME = "PixelDraw";
-    const APP_VERSION = "2.0";
+    const APP_VERSION = "2.1";
     const WIDTH = 16;
     const HEIGHT = 16;
-    const STORAGE_KEY = "pixelDrawingData-v2.0";
+    const STORAGE_KEY = "pixelDrawingData-v2.1";
 
     // 固定パレット（最初からある6色 + 最後の透明1色）
     const FIXED_COLORS_START = ["#000000", "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ffffff"];
@@ -69,7 +69,7 @@
     const compress = () => {
         const ids = pixels.map(p => Number(p.dataset.colorIndex));
         const res = [];
-        for (let i = 0; i < ids.length; ) {
+        for (let i = 0; i < ids.length;) {
             let count = 1;
             let val = ids[i];
             while (i + count < ids.length && ids[i + count] === val) count++;
@@ -90,11 +90,11 @@
                 const count = val[1];
                 const colorIndex = pxData[++i];
                 for (let c = 0; c < count; c++) indices.push(colorIndex);
-            } 
+            }
             // v2.0 形式のデコード [colorIndex, count]
             else if (Array.isArray(val) && val.length === 2) {
                 for (let c = 0; c < val[1]; c++) indices.push(val[0]);
-            } 
+            }
             else if (typeof val === "number") {
                 indices.push(val);
             }
@@ -110,7 +110,7 @@
     const getTs = () => {
         const d = new Date();
         const p = n => n.toString().padStart(2, "0");
-        return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}`;
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}`;
     };
 
     const saveToLocal = () => {
@@ -173,7 +173,7 @@
         };
         ui.appendChild(sel); ui.appendChild(btn);
         document.body.appendChild(ui);
-        ui.onclick = (e) => { if(e.target === ui) ui.remove(); };
+        ui.onclick = (e) => { if (e.target === ui) ui.remove(); };
     };
 
     // JSON読み込み
@@ -259,7 +259,7 @@
     // --- 起動処理 ---
     window.onload = () => {
         $("year").textContent = new Date().getFullYear();
-        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("pixelDrawingData-v2.0");
+        const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("pixelDrawingData-v2.1");
         if (saved) {
             try {
                 const d = JSON.parse(saved);
