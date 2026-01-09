@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <title>Canvas App</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
@@ -258,6 +260,7 @@
         }
     </style>
 </head>
+
 <body data-theme="dark">
 
     <div id="brush-cursor"></div>
@@ -275,16 +278,19 @@
         <div class="modal-content glass">
             <h2 style="font-weight: 900;">NEW ARTWORK</h2>
             <input type="text" id="art-name-input" placeholder="名前を入力..." style="width:100%; padding:16px; margin:20px 0; border-radius:14px; background:var(--input); color:var(--text); border:1px solid var(--border); font-weight: 700;">
+            
             <select id="res-preset" onchange="ui.onPresetChange()" style="width:100%; padding:14px; border-radius:14px; background:var(--input); color:var(--text); border:1px solid var(--border); margin-bottom:20px;">
                 <option value="1080x1080" selected>正方形 (1080x1080)</option>
                 <option value="1280x720">横長 (1280x720)</option>
                 <option value="720x1280">縦長 (720x1280)</option>
                 <option value="custom">カスタムサイズ</option>
             </select>
+            
             <div id="custom-fields" style="display:none; gap:12px; margin-bottom:20px;">
                 <input type="number" id="in-w" value="1080" style="width:48%; padding:14px; background:var(--input); color:var(--text); border-radius:12px; border:none;">
                 <input type="number" id="in-h" value="1080" style="width:48%; padding:14px; background:var(--input); color:var(--text); border-radius:12px; border:none;">
             </div>
+            
             <button class="primary-btn" onclick="app.createNew()">キャンバスを作成</button>
             <button class="primary-btn" style="background:none;" onclick="ui.closeCreate()">キャンセル</button>
         </div>
@@ -344,8 +350,8 @@
             scale: 1, tx: 0, ty: 0, active: false, lx: 0, ly: 0,
             undo: [], redo: [], bgColor: '#ffffff'
         };
-
-const randomNames = {
+// AI がランダム名前を 生成したので 何があるか把握してません
+        const randomNames = {
             clothing_dress: [
                 'ワンピース', 'Dress', '白いワンピース', 'White Dress', '可憐なWhite Dress', '夏休みのワンピース', 
                 'パフスリーブ', 'Puff Sleeves', '夢見るPuff Sleeves', 'フリルのワンピース', 'Frill Dress', 'サマードレス', 
@@ -424,13 +430,14 @@ const randomNames = {
                 '夜明け', 'Before Dawn', '夜明け前', '永遠', 'Eternal Moment'
             ]
         };
+        
 
         const layers = {
             data: [],
             activeId: null,
 
-            add(isBase = false) {
-                const id = isBase ? 'layer_0' : 'layer_' + Date.now();
+            add(isBase = false, savedInfo = null) {
+                const id = savedInfo ? savedInfo.id : (isBase ? 'layer_0' : 'layer_' + Date.now());
                 const cv = document.createElement('canvas');
                 cv.width = state.w; cv.height = state.h; cv.id = id;
                 const sc = document.getElementById('stage-container');
@@ -438,11 +445,19 @@ const randomNames = {
                 
                 if (isBase) {
                     sc.insertBefore(cv, il);
-                    this.data.unshift({ id, name: '背景', vis: true, lock: true });
+                    this.data.unshift({ id, name: savedInfo ? savedInfo.name : '背景', vis: true, lock: true });
                 } else {
                     sc.insertBefore(cv, il);
-                    this.data.push({ id, name: 'レイヤー ' + this.data.length, vis: true, lock: false });
+                    this.data.push({ id, name: savedInfo ? savedInfo.name : 'レイヤー ' + this.data.length, vis: true, lock: false });
                 }
+                
+                if (savedInfo && savedInfo.data) {
+                    const ctx = cv.getContext('2d');
+                    const img = new Image();
+                    img.onload = () => ctx.drawImage(img, 0, 0);
+                    img.src = savedInfo.data;
+                }
+
                 this.select(id);
                 this.syncZ();
                 this.render();
@@ -536,19 +551,34 @@ const randomNames = {
 
         const app = {
             boot() {
+                const lastId = localStorage.getItem('canvas_last_id');
                 const saved = JSON.parse(localStorage.getItem('canvas_pro_data') || '[]');
-                if (saved.length) this.load(saved[0].id); else ui.showCreate();
+                
+                if (lastId && saved.find(p => p.id === lastId)) {
+                    this.load(lastId);
+                } else if (saved.length) {
+                    this.load(saved[0].id);
+                } else {
+                    ui.showCreate();
+                }
+
                 this.bind();
                 window.addEventListener('resize', () => this.fit());
             },
 
-            setup() {
+            setup(savedLayers = null) {
                 const sc = document.getElementById('stage-container');
                 sc.querySelectorAll('canvas').forEach(c => c.remove());
                 sc.style.width = state.w + 'px'; sc.style.height = state.h + 'px';
                 layers.data = [];
-                layers.add(true);
-                layers.updateBg(state.bgColor);
+
+                if (savedLayers) {
+                    savedLayers.forEach((l, idx) => layers.add(idx === 0, l));
+                } else {
+                    layers.add(true);
+                    layers.updateBg(state.bgColor);
+                }
+
                 this.fit();
                 state.undo = [];
                 state.redo = [];
@@ -580,7 +610,8 @@ const randomNames = {
                         state.lx = p.x; state.ly = p.y;
                     }
                 };
-                window.onpointerup = () => { state.active = false; this.save(); };
+
+                window.onpointerup = () => { if(state.active) { state.active = false; this.save(); } };
                 il.onpointerenter = () => { if(state.tool !== 'move') cursor.style.display = 'block'; };
                 il.onpointerleave = () => { cursor.style.display = 'none'; };
             },
@@ -629,7 +660,7 @@ const randomNames = {
 
             pushUndo() {
                 state.undo.push(layers.data.map(l => ({ id: l.id, data: document.getElementById(l.id).toDataURL() })));
-                if(state.undo.length > 30) state.undo.shift();
+                if(state.undo.length > 20) state.undo.shift();
                 state.redo = [];
             },
 
@@ -637,12 +668,14 @@ const randomNames = {
                 if(!state.undo.length) return;
                 state.redo.push(layers.data.map(l => ({ id: l.id, data: document.getElementById(l.id).toDataURL() })));
                 this.apply(state.undo.pop());
+                this.save();
             },
 
             redo() {
                 if(!state.redo.length) return;
                 state.undo.push(layers.data.map(l => ({ id: l.id, data: document.getElementById(l.id).toDataURL() })));
                 this.apply(state.redo.pop());
+                this.save();
             },
 
             apply(snap) {
@@ -699,18 +732,36 @@ const randomNames = {
                 const combined = document.createElement('canvas');
                 combined.width = state.w; combined.height = state.h;
                 const cctx = combined.getContext('2d');
+                
+                const layerStates = layers.data.map(l => ({
+                    id: l.id,
+                    name: l.name,
+                    data: document.getElementById(l.id).toDataURL()
+                }));
+
                 layers.data.forEach(l => { if(l.vis) cctx.drawImage(document.getElementById(l.id), 0, 0); });
                 const thumb = combined.toDataURL('image/jpeg', 0.1);
+                
                 const idx = list.findIndex(p => p.id === state.id);
-                const info = { id: state.id, name: state.name, w: state.w, h: state.h, thumb, bgColor: state.bgColor };
+                const info = { 
+                    id: state.id, name: state.name, w: state.w, h: state.h, 
+                    thumb, bgColor: state.bgColor, layers: layerStates 
+                };
+
                 if(idx === -1) list.unshift(info); else list[idx] = info;
                 localStorage.setItem('canvas_pro_data', JSON.stringify(list));
+                localStorage.setItem('canvas_last_id', state.id);
             },
 
             load(id) {
                 const list = JSON.parse(localStorage.getItem('canvas_pro_data') || '[]');
                 const p = list.find(x => x.id === id);
-                if(p) { state.id = id; state.name = p.name; state.w = p.w; state.h = p.h; state.bgColor = p.bgColor || '#ffffff'; this.setup(); }
+                if(p) { 
+                    state.id = id; state.name = p.name; state.w = p.w; state.h = p.h; 
+                    state.bgColor = p.bgColor || '#ffffff'; 
+                    this.setup(p.layers || null); 
+                }
+                localStorage.setItem('canvas_last_id', id);
                 ui.closeProjects();
             },
 
@@ -721,28 +772,12 @@ const randomNames = {
                 layers.data.forEach(l => { if(l.vis) octx.drawImage(document.getElementById(l.id), 0, 0); });
 
                 const now = new Date();
-                const y = now.getFullYear();
-                const m = String(now.getMonth() + 1).padStart(2, '0');
-                const d = String(now.getDate()).padStart(2, '0');
-                const h = String(now.getHours()).padStart(2, '0');
-                const mi = String(now.getMinutes()).padStart(2, '0');
-                const s = String(now.getSeconds()).padStart(2, '0');
-
+                const ts = now.toISOString().replace(/[:.]/g, '-');
                 const name = state.name.replace(/\s+/g, '_');
-                const fileNameBase = `Art-${name}_${y}-${m}-${d}_${h}-${mi}-${s}`;
-
-                const formats = [
-                    { ext: 'png', type: 'image/png' },
-                    { ext: 'jpg', type: 'image/jpeg' },
-                    { ext: 'webp', type: 'image/webp' }
-                ];
-
-                formats.forEach(fmt => {
-                    const a = document.createElement('a');
-                    a.download = `${fileNameBase}.${fmt.ext}`;
-                    a.href = out.toDataURL(fmt.type, fmt.ext === 'jpg' ? 0.9 : undefined);
-                    a.click();
-                });
+                const a = document.createElement('a');
+                a.download = `Art-${name}_${ts}.png`;
+                a.href = out.toDataURL('image/png');
+                a.click();
             }
         };
 
@@ -751,8 +786,7 @@ const randomNames = {
             closeProjects() { document.getElementById('project-modal').style.display = 'none'; },
             showCreate() { 
                 const cats = Object.keys(randomNames);
-                const cat = cats[Math.floor(Math.random() * cats.length)];
-                const names = randomNames[cat];
+                const names = randomNames[cats[Math.floor(Math.random() * cats.length)]];
                 document.getElementById('art-name-input').value = names[Math.floor(Math.random() * names.length)];
                 document.getElementById('create-modal').style.display = 'flex'; 
             },
@@ -769,6 +803,7 @@ const randomNames = {
                 let list = JSON.parse(localStorage.getItem('canvas_pro_data') || '[]');
                 list = list.filter(p => p.id !== id);
                 localStorage.setItem('canvas_pro_data', JSON.stringify(list));
+                if(state.id === id) localStorage.removeItem('canvas_last_id');
                 this.renderProjects();
             },
             renderProjects() {
@@ -795,4 +830,5 @@ const randomNames = {
         window.onload = () => app.boot();
     </script>
 </body>
+
 </html>
