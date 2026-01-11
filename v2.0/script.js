@@ -24,7 +24,7 @@
     const titleInput = $("titleInput");
     const fileLoadInput = $("file-load");
 
-    // --- 1. 初期化：ピクセル生成 ---
+    // --- 初期化：ピクセル生成 ---
     if (canvasEl) {
         for (let i = 0; i < WIDTH * HEIGHT; i++) {
             const p = document.createElement("div");
