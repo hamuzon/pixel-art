@@ -14,7 +14,7 @@
   let linkHref = "";
   let linkText = "";
 
-  if (host.includes("hamusata.f5.si")) {
+  if (host.includes("pixel-art.hamusata.f5.si/")) {
     linkHref = "https://hamusata.f5.si";
     linkText = "@hamusata";
   } else if (host === "hamuzon.github.io") {
