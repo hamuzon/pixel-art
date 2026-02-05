@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <title>Canvas App</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --panel: rgba(30, 30, 35, 0.85);
+            --text: #ffffff;
+            --sub: #a1a1aa;
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #3b82f6;
+            --input: #27272a;
+            --danger: #ff453a;
+            --glass: blur(25px) saturate(180%);
+        }
+
+        [data-theme="light"] {
+            --bg: #f4f4f5;
+            --panel: rgba(255, 255, 255, 0.85);
+            --text: #18181b;
+            --sub: #71717a;
+            --border: rgba(0, 0, 0, 0.1);
+            --accent: #2563eb;
+            --input: #e4e4e7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body, html {
+            height: 100%;
+            width: 100%;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border);
+            z-index: 2000;
+        }
+
+        #viewport {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        #stage-container {
+            position: relative;
+            background: #fff;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            transform-origin: center;
+        }
+
+        canvas {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        #interaction-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            cursor: none;
+            touch-action: none;
+        }
+
+        #brush-cursor {
+            position: fixed;
+            pointer-events: none;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            mix-blend-mode: difference;
+            z-index: 9999;
+            display: none;
+        }
+
+        .glass {
+            background: var(--panel);
+            backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
+            border: 1px solid var(--border);
+        }
+
+        #toolbar {
+            position: fixed;
+            left: 16px;
+            top: 76px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 16px;
+            z-index: 1001;
+        }
+
+        #layer-panel {
+            position: fixed;
+            right: 16px;
+            top: 76px;
+            width: 260px;
+            max-height: 55vh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 20px;
+            padding: 16px;
+            z-index: 1001;
+        }
+
+        #layer-list {
+            overflow-y: auto;
+            flex: 1;
+            margin-top: 12px;
+            padding-right: 4px;
+        }
+
+        #bottom-bar {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border-radius: 24px;
+            z-index: 1001;
+        }
+
+        .btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:active { transform: scale(0.9); }
+        .btn.active { background: var(--accent); color: #fff; }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: var(--input);
+            border-radius: 14px;
+            margin-bottom: 8px;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+
+        .layer-item.active { border-color: var(--accent); }
+
+        .layer-name {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 700;
+            outline: none;
+            min-width: 0;
+        }
+
+        .project-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--input);
+            border-radius: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .thumb-prev {
+            width: 44px;
+            height: 44px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .thumb-prev img { width: 100%; height: 100%; object-fit: cover; }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 420px;
+            padding: 32px;
+            border-radius: 32px;
+        }
+
+        .primary-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 16px;
+            width: 100%;
+            border-radius: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        input[type="range"] { flex: 1; accent-color: var(--accent); }
+
+        @media (max-width: 600px) {
+            #toolbar { left: 50%; top: auto; bottom: 160px; transform: translateX(-50%); flex-direction: row; }
+            #layer-panel { top: 70px; right: 10px; width: 200px; max-height: 40vh; }
+            #brush-cursor { display: none !important; }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+
+    <div id="brush-cursor"></div>
+
+    <div id="project-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content glass">
+            <h2 style="margin-bottom:20px; font-weight: 900;">GALLERY</h2>
+            <div id="project-list" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;"></div>
+            <button class="primary-btn" onclick="ui.showCreate()">新規作成</button>
+            <button class="primary-btn" style="background:none;" onclick="ui.closeProjects()">戻る</button>
+        </div>
+    </div>
+
+    <div id="create-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content glass">
+            <h2 style="font-weight: 900;">NEW ARTWORK</h2>
+            <input type="text" id="art-name-input" placeholder="名前を入力..." style="width:100%; padding:16px; margin:20px 0; border-radius:14px; background:var(--input); color:var(--text); border:1px solid var(--border); font-weight: 700;">
+            
+            <select id="res-preset" onchange="ui.onPresetChange()" style="width:100%; padding:14px; border-radius:14px; background:var(--input); color:var(--text); border:1px solid var(--border); margin-bottom:20px;">
+                <option value="1080x1080" selected>正方形 (1080x1080)</option>
+                <option value="1280x720">横長 (1280x720)</option>
+                <option value="720x1280">縦長 (720x1280)</option>
+                <option value="custom">カスタムサイズ</option>
+            </select>
+            
+            <div id="custom-fields" style="display:none; gap:12px; margin-bottom:20px;">
+                <input type="number" id="in-w" value="1080" style="width:48%; padding:14px; background:var(--input); color:var(--text); border-radius:12px; border:none;">
+                <input type="number" id="in-h" value="1080" style="width:48%; padding:14px; background:var(--input); color:var(--text); border-radius:12px; border:none;">
+            </div>
+            
+            <button class="primary-btn" onclick="app.createNew()">キャンバスを作成</button>
+            <button class="primary-btn" style="background:none;" onclick="ui.closeCreate()">キャンセル</button>
+        </div>
+    </div>
+
+    <header class="glass">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button class="btn" onclick="ui.openProjects()"><span class="material-symbols-rounded">grid_view</span></button>
+            <h1 style="font-size:16px; font-weight:900; color:var(--accent); letter-spacing: 1px;">CANVAS APP</h1>
+        </div>
+        <div style="display:flex; gap:6px;">
+            <button class="btn" onclick="app.undo()"><span class="material-symbols-rounded">undo</span></button>
+            <button class="btn" onclick="app.redo()"><span class="material-symbols-rounded">redo</span></button>
+            <button class="btn" onclick="ui.toggleTheme()"><span class="material-symbols-rounded" id="mode-icon">dark_mode</span></button>
+            <button class="btn" onclick="app.exportImage()" style="color:var(--accent);"><span class="material-symbols-rounded">download</span></button>
+        </div>
+    </header>
+
+    <nav id="toolbar" class="glass">
+        <button class="btn active" data-tool="pen" onclick="app.setTool('pen')"><span class="material-symbols-rounded">brush</span></button>
+        <button class="btn" data-tool="fill" onclick="app.setTool('fill')"><span class="material-symbols-rounded">format_paint</span></button>
+        <button class="btn" data-tool="eraser" onclick="app.setTool('eraser')"><span class="material-symbols-rounded">ink_eraser</span></button>
+        <button class="btn" data-tool="move" onclick="app.setTool('move')"><span class="material-symbols-rounded">pan_tool</span></button>
+    </nav>
+
+    <aside id="layer-panel" class="glass">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; font-weight:900; color:var(--accent); opacity: 0.8;">LAYERS</span>
+            <button class="btn" style="width:32px; height:32px; background:var(--accent); color:#fff; border-radius:10px;" onclick="layers.add()">
+                <span class="material-symbols-rounded" style="font-size:20px;">add</span>
+            </button>
+        </div>
+        <div id="layer-list"></div>
+    </aside>
+
+    <main id="viewport">
+        <div id="stage-container">
+            <div id="interaction-layer"></div>
+        </div>
+    </main>
+
+    <footer id="bottom-bar" class="glass">
+        <div style="display:flex; align-items:center; gap:16px;">
+            <div style="position:relative; width:48px; height:48px; border-radius:50%; border:3px solid var(--text); overflow:hidden; flex-shrink:0; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <input type="color" id="color-pick" value="#000000" style="position:absolute; top:-10px; left:-10px; width:70px; height:70px; cursor:pointer; border:none;">
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                <input type="range" id="size-slider" min="1" max="300" value="20">
+            </div>
+            <span id="sz-num" style="font-size:14px; font-weight:900; width:35px; text-align: right;">20</span>
+        </div>
+    </footer>
+
+    <script>
+        const state = {
+            id: null, name: '', w: 1080, h: 1080, tool: 'pen',
+            scale: 1, tx: 0, ty: 0, active: false, lx: 0, ly: 0,
+            undo: [], redo: [], bgColor: '#ffffff'
+        };
+// AI がランダム名前を 生成したので 何があるか把握してません
+        const randomNames = {
+            clothing_dress: [
+                'ワンピース', 'Dress', '白いワンピース', 'White Dress', '可憐なWhite Dress', '夏休みのワンピース', 
+                'パフスリーブ', 'Puff Sleeves', '夢見るPuff Sleeves', 'フリルのワンピース', 'Frill Dress', 'サマードレス', 
+                'Summer Dress', '海辺のSummer Dress', 'マキシ丈', 'Maxi Dress', '風に舞うMaxi', 'エプロンドレス', 
+                'Apron Dress', '物語のエプロンドレス', 'ゴシックワンピ', 'Gothic Dress', '宵闇のGothic Dress'
+            ],
+            clothing_uniform: [
+                'セーラー服', 'Sailor Uniform', '紺碧のSailor服', '冬のセーラー', 'Winter Sailor', '憧れのセーラー服',
+                'ブレザー', 'Blazer', '着崩したBlazer', '学校の指定ブレザー', 'High School Blazer', '放課後のブレザー',
+                'チェックのスカート', 'Checkered Skirt', 'お揃いのSkirt', 'プリーツスカート', 'Pleated Skirt',
+                'スクールカーディガン', 'School Cardigan', '萌え袖のCardigan', '放課後の制服', 'After School Uniform',
+                'ネクタイ', 'School Tie', '赤色のSchool Tie', '学ラン', 'Gakuran', '硬派なGakuran', '第二ボタン'
+            ],
+            clothing_casual: [
+                'パーカー', 'Hoodie', 'ダボだぼパーカー', 'Oversized Hoodie', '秘密のHoodie', 'ゆるスウェット', 
+                'デニム', 'Vintage Denim', 'お気に入りのDenim', 'ダメージジーンズ', 'Ripped Jeans', 'フリルブラウス', 
+                'Frill Blouse', '繊細なLace Blouse', 'オフショル', 'Off-shoulder', 'スタジャン', 'Stadium Jumper', 
+                'レトロなスタジャン', 'ライダース', 'Riders Jacket', 'ボロボロのマント', 'Tattered Cloak'
+            ],
+            student_life: [
+                '年少さん', 'Kindergarten', 'ひよこ組の年少さん', '卒園式', 'Preschool Graduation', '年長さん',
+                '一年生', '1st Grade', 'ぴかぴかのFirst Grade', 'ランドセル', 'School Backpack', '朝の登校路',
+                '中学二年生', '8th Grade', '疾風怒濤の8th Grade', '部活動', 'Club Activity', '放課後のチャイム',
+                '高校三年生', 'High School Senior', '最後のHigh School Summer', '受験生', 'Exam Student',
+                '大学生', 'University Student', 'キャンパスライフ', 'Campus Life', '専門学校生', 'Vocational Student'
+            ],
+            family_bonds: [
+                'お兄ちゃん', 'Big Brother', '頼れるBig Brother', '妹', 'Little Sister', '生意気なLittle Sister', 
+                '三姉妹', 'Three Sisters', 'お父さん', 'Father Figure', 'お父さんの背中', 'お母さん', 'Mother’s Love', 
+                '優しいMother’s Smile', '双子', 'Twins', '鏡合わせのTwins', 'そっくりな二人'
+            ],
+            fox_spirits: [
+                '白狐', 'White Fox', '稲荷の白狐', '神秘のWhite Fox', '九尾の狐', 'Nine-Tailed Fox', 
+                '伝説のKitsune', '妖しく光る九尾', '狐の嫁入り', 'Fox Wedding', '宵闇のFox Wedding', 
+                '社の守り神', 'Shrine Guardian', '社のGuardian', '雪原の白狐', 'Snow Fox', '影を操る黒狐', 'Black Kitsune'
+            ],
+            kawaii_and_animal: [
+                'ゆめかわ', 'Dreamy Cute', 'ふわふわのDreamy', 'メルヘン', 'Märchen', 'パステルカラー', 
+                'Pastel Pop', '砂糖菓子', 'Sugar Candy', '天使の微笑み', 'Little Angel', '子猫', 'Kitty', 
+                'まどろみのKitty', '黒猫', 'Black Cat', 'うさぎ', 'Bunny', 'シマエナガ', 'Snow Tit', 
+                'もふもふのSnow Tit', 'テディベア', 'Teddy Bear', '抱きしめたいTeddy'
+            ],
+            jewels_and_colors: [
+                'ルビー', 'Burning Ruby', '情熱のルビー', 'サファイア', 'Silent Sapphire', '静謐のサファイア', 
+                'エメラルド', 'Hope Emerald', '希望のエメラルド', '真珠', 'Pearl', '純真なPearl', 'オニキス', 
+                'Black Onyx', 'ダイヤモンド', 'Diamond', '永遠のDiamond', '琥珀', 'Amber', '真夜中の青', 'Midnight Blue'
+            ],
+            food_and_sweets: [
+                'パンケーキ', 'Pancakes', '至福のPancakes', 'ふわふわパンケーキ', 'ピザ', 'Midnight Pizza', 
+                '真夜中のピザ', '背徳のPizza', '珈琲', 'Amber Coffee', '琥珀色の珈琲', '抹茶', 'Green Tea', 
+                '濃厚なGreen Tea', 'オムライス', 'Special Omelette', '三ツ星オムライス', 'カップケーキ', 'Magic Cupcake'
+            ],
+            events_and_seasons: [
+                '体育祭', 'Sports Day', '情熱のSports Day', '文化祭', 'School Festival', '秘密の文化祭', 
+                '修学旅行', 'School Trip', '新幹線の窓から', 'ハロウィン', 'Halloween Night', 'クリスマス', 
+                'Christmas', 'お正月', 'New Year', '夏祭り', 'Summer Fest', '花火', 'Fireworks Night', '七夕', 'Star Fest'
+            ],
+            weather_and_space: [
+                '通り雨', 'Passing Rain', '午後のPassing Rain', '霧', 'Amber Mist', '琥珀色の霧', 
+                '雷', 'Lightning Flash', '稲妻の閃光', '五月晴れ', 'Sunny Day', '銀河', 'Milky Way', 
+                '銀河の河原', '三日月', 'Crescent Moon', '三日月の夜', '流星群', 'Meteor Shower', '超新星', 'Supernova'
+            ],
+            game_and_shapes: [
+                'レベル99', 'Level 99', '初期装備', 'Starting Gear', 'ラスボス前夜', 'Final Boss', 
+                '8bit', 'Pixel Adventure', '8bitの冒険', '黄金比', 'Golden Ratio', '無限の螺旋', 
+                'Infinite Spiral', '正方形', 'Imperfect Square', '幾何学', 'Geometry', '万華鏡', 'Kaleidoscope'
+            ],
+            emotions_and_abstract: [
+                '幸せ', 'Pure Happiness', '純粋な幸せ', '憂鬱', 'Blue Melancholy', '青い憂鬱', 
+                '情熱', 'Burning Passion', '燃える情熱', '安らぎ', 'Silent Serenity', '静かな安らぎ', 
+                '筆文字', 'Calligraphy', '墨の飛沫', 'ネオン', 'Neon Sign', '光るメッセージ', 'グリッチ', 'Glitch Text'
+            ],
+            fantasy_and_time: [
+                '聖剣', 'Holy Sword', '黄金の聖剣', '魔導書', 'Grimoire', '禁断の魔導書', '天空の城', 
+                'Floating Castle', '黄昏', 'Twilight Time', '黄昏時', '午前零時', 'Midnight 0:00', 
+                '夜明け', 'Before Dawn', '夜明け前', '永遠', 'Eternal Moment'
+            ]
+        };
+        
+
+        const layers = {
+            data: [],
+            activeId: null,
+
+            add(isBase = false, savedInfo = null) {
+                const id = savedInfo ? savedInfo.id : (isBase ? 'layer_0' : 'layer_' + Date.now());
+                const cv = document.createElement('canvas');
+                cv.width = state.w; cv.height = state.h; cv.id = id;
+                const sc = document.getElementById('stage-container');
+                const il = document.getElementById('interaction-layer');
+                
+                if (isBase) {
+                    sc.insertBefore(cv, il);
+                    this.data.unshift({ id, name: savedInfo ? savedInfo.name : '背景', vis: true, lock: true });
+                } else {
+                    sc.insertBefore(cv, il);
+                    this.data.push({ id, name: savedInfo ? savedInfo.name : 'レイヤー ' + this.data.length, vis: true, lock: false });
+                }
+                
+                if (savedInfo && savedInfo.data) {
+                    const ctx = cv.getContext('2d');
+                    const img = new Image();
+                    img.onload = () => ctx.drawImage(img, 0, 0);
+                    img.src = savedInfo.data;
+                }
+
+                this.select(id);
+                this.syncZ();
+                this.render();
+            },
+
+            select(id) { 
+                this.activeId = id; 
+                this.render(); 
+            },
+
+            updateBg(color) {
+                state.bgColor = color;
+                const canvas = document.getElementById('layer_0');
+                if(!canvas) return;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = color;
+                ctx.fillRect(0, 0, state.w, state.h);
+                app.save();
+            },
+
+            move(id, dir, e) {
+                e.stopPropagation();
+                const idx = this.data.findIndex(l => l.id === id);
+                if (this.data[idx].lock) return;
+                const target = idx + dir;
+                if (target < 1 || target >= this.data.length) return;
+                [this.data[idx], this.data[target]] = [this.data[target], this.data[idx]];
+                this.syncZ();
+                this.render();
+                app.save();
+            },
+
+            syncZ() {
+                const sc = document.getElementById('stage-container');
+                const il = document.getElementById('interaction-layer');
+                this.data.forEach(l => {
+                    const el = document.getElementById(l.id);
+                    if(el) sc.insertBefore(el, il);
+                });
+            },
+
+            toggle(id, e) {
+                e.stopPropagation();
+                const l = this.data.find(x => x.id === id);
+                l.vis = !l.vis;
+                document.getElementById(id).style.display = l.vis ? 'block' : 'none';
+                this.render();
+            },
+
+            remove(id, e) {
+                e.stopPropagation();
+                const l = this.data.find(x => x.id === id);
+                if (l.lock) return;
+                this.data = this.data.filter(x => x.id !== id);
+                const el = document.getElementById(id);
+                if(el) el.remove();
+                if (this.activeId === id) this.activeId = this.data[this.data.length-1].id;
+                this.render();
+                app.save();
+            },
+
+            render() {
+                const list = document.getElementById('layer-list');
+                list.innerHTML = '';
+                [...this.data].reverse().forEach(l => {
+                    const div = document.createElement('div');
+                    div.className = `layer-item ${l.id === this.activeId ? 'active' : ''}`;
+                    div.onclick = () => this.select(l.id);
+                    div.innerHTML = `
+                        <button class="btn" style="width:28px; height:28px;" onclick="layers.toggle('${l.id}', event)">
+                            <span class="material-symbols-rounded" style="font-size:18px;">${l.vis ? 'visibility' : 'visibility_off'}</span>
+                        </button>
+                        <input class="layer-name" value="${l.name}" ${l.lock ? 'readonly' : ''} onchange="layers.data.find(x=>x.id==='${l.id}').name=this.value" onclick="event.stopPropagation()">
+                        <div style="display:flex; gap:2px;">
+                            ${l.lock ? `
+                                <div style="position:relative; width:28px; height:28px; overflow:hidden;">
+                                    <span class="material-symbols-rounded" style="font-size:20px; color:var(--accent);">palette</span>
+                                    <input type="color" value="${state.bgColor}" oninput="layers.updateBg(this.value)" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+                                </div>
+                            ` : `
+                                <button class="btn" style="width:28px; height:28px;" onclick="layers.move('${l.id}', 1, event)"><span class="material-symbols-rounded" style="font-size:18px;">expand_less</span></button>
+                                <button class="btn" style="width:28px; height:28px;" onclick="layers.move('${l.id}', -1, event)"><span class="material-symbols-rounded" style="font-size:18px;">expand_more</span></button>
+                                <button class="btn" style="width:28px; height:28px; color:var(--danger);" onclick="layers.remove('${l.id}', event)"><span class="material-symbols-rounded" style="font-size:18px;">delete</span></button>
+                            `}
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+        };
+
+        const app = {
+            boot() {
+                const lastId = localStorage.getItem('canvas_last_id');
+                const saved = JSON.parse(localStorage.getItem('canvas_pro_data') || '[]');
+                
+                if (lastId && saved.find(p => p.id === lastId)) {
+                    this.load(lastId);
+                } else if (saved.length) {
+                    this.load(saved[0].id);
+                } else {
+                    ui.showCreate();
+                }
+
+                this.bind();
+                window.addEventListener('resize', () => this.fit());
+            },
+
+            setup(savedLayers = null) {
+                const sc = document.getElementById('stage-container');
+                sc.querySelectorAll('canvas').forEach(c => c.remove());
+                sc.style.width = state.w + 'px'; sc.style.height = state.h + 'px';
+                layers.data = [];
+
+                if (savedLayers) {
+                    savedLayers.forEach((l, idx) => layers.add(idx === 0, l));
+                } else {
+                    layers.add(true);
+                    layers.updateBg(state.bgColor);
+                }
+
+                this.fit();
+                state.undo = [];
+                state.redo = [];
+            },
+
+            bind() {
+                const il = document.getElementById('interaction-layer');
+                const cursor = document.getElementById('brush-cursor');
+
+                il.onpointerdown = (e) => {
+                    if (state.tool === 'move') { state.active = true; state.lx = e.clientX; state.ly = e.clientY; return; }
+                    this.pushUndo();
+                    const p = this.getPos(e);
+                    if (state.tool === 'fill') { this.floodFill(Math.floor(p.x), Math.floor(p.y)); return; }
+                    state.active = true; state.lx = p.x; state.ly = p.y;
+                    this.draw(p.x, p.y);
+                };
+
+                window.onpointermove = (e) => {
+                    cursor.style.left = e.clientX + 'px';
+                    cursor.style.top = e.clientY + 'px';
+                    if (!state.active) return;
+                    if (state.tool === 'move') {
+                        state.tx += (e.clientX - state.lx); state.ty += (e.clientY - state.ly);
+                        state.lx = e.clientX; state.ly = e.clientY; this.updateView();
+                    } else if (state.tool !== 'fill') {
+                        const p = this.getPos(e); 
+                        this.draw(p.x, p.y);
+                        state.lx = p.x; state.ly = p.y;
+                    }
+                };
+
+                window.onpointerup = () => { if(state.active) { state.active = false; this.save(); } };
+                il.onpointerenter = () => { if(state.tool !== 'move') cursor.style.display = 'block'; };
+                il.onpointerleave = () => { cursor.style.display = 'none'; };
+            },
+
+            getPos(e) {
+                const r = document.getElementById('stage-container').getBoundingClientRect();
+                return { x: (e.clientX - r.left) / state.scale, y: (e.clientY - r.top) / state.scale };
+            },
+
+            draw(x, y) {
+                const l = layers.data.find(x => x.id === layers.activeId);
+                if (!l || !l.vis) return;
+                const ctx = document.getElementById(l.id).getContext('2d');
+                ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                ctx.lineWidth = document.getElementById('size-slider').value;
+                ctx.strokeStyle = document.getElementById('color-pick').value;
+                ctx.globalCompositeOperation = state.tool === 'eraser' ? 'destination-out' : 'source-over';
+                ctx.beginPath(); ctx.moveTo(state.lx, state.ly); ctx.lineTo(x, y); ctx.stroke();
+            },
+
+            floodFill(sx, sy) {
+                const l = layers.data.find(x => x.id === layers.activeId);
+                if (!l || !l.vis) return;
+                const ctx = document.getElementById(l.id).getContext('2d');
+                const img = ctx.getImageData(0,0,state.w,state.h);
+                const d = img.data;
+                const i = (sy*state.w+sx)*4;
+                const target = [d[i], d[i+1], d[i+2], d[i+3]];
+                const color = document.getElementById('color-pick').value;
+                const fill = [parseInt(color.slice(1,3),16), parseInt(color.slice(3,5),16), parseInt(color.slice(5,7),16), 255];
+                if (target[0]===fill[0] && target[1]===fill[1] && target[2]===fill[2] && target[3]===fill[3]) return;
+                
+                const q = [[sx, sy]];
+                while(q.length) {
+                    const [x, y] = q.pop();
+                    const cur = (y*state.w+x)*4;
+                    if (d[cur]===target[0] && d[cur+1]===target[1] && d[cur+2]===target[2] && d[cur+3]===target[3]) {
+                        d[cur]=fill[0]; d[cur+1]=fill[1]; d[cur+2]=fill[2]; d[cur+3]=255;
+                        if(x>0) q.push([x-1, y]); if(x<state.w-1) q.push([x+1, y]);
+                        if(y>0) q.push([x, y-1]); if(y<state.h-1) q.push([x, y+1]);
+                    }
+                }
+                ctx.putImageData(img,0,0);
+                this.save();
+            },
+
+            pushUndo() {
+                state.undo.push(layers.data.map(l => ({ id: l.id, data: document.getElementById(l.id).toDataURL() })));
+                if(state.undo.length > 20) state.undo.shift();
+                state.redo = [];
+            },
+
+            undo() {
+                if(!state.undo.length) return;
+                state.redo.push(layers.data.map(l => ({ id: l.id, data: document.getElementById(l.id).toDataURL() })));
+                this.apply(state.undo.pop());
+                this.save();
+            },
+
+            redo() {
+                if(!state.redo.length) return;
+                state.undo.push(layers.data.map(l => ({ id: l.id, data: document.getElementById(l.id).toDataURL() })));
+                this.apply(state.redo.pop());
+                this.save();
+            },
+
+            apply(snap) {
+                snap.forEach(s => {
+                    const cv = document.getElementById(s.id);
+                    if(!cv) return;
+                    const ctx = cv.getContext('2d');
+                    const img = new Image();
+                    img.onload = () => { ctx.clearRect(0,0,state.w,state.h); ctx.drawImage(img,0,0); };
+                    img.src = s.data;
+                });
+            },
+
+            updateView() { document.getElementById('stage-container').style.transform = `translate(${state.tx}px, ${state.ty}px) scale(${state.scale})`; },
+            
+            fit() {
+                const v = document.getElementById('viewport');
+                state.scale = Math.min((v.clientWidth - 40) / state.w, (v.clientHeight - 100) / state.h, 1);
+                state.tx = 0; state.ty = 0; 
+                this.updateView();
+                this.updateCursor();
+            },
+
+            setTool(t) {
+                state.tool = t;
+                document.querySelectorAll('#toolbar .btn').forEach(b => b.classList.remove('active'));
+                const target = document.querySelector(`[data-tool="${t}"]`);
+                if(target) target.classList.add('active');
+            },
+
+            updateCursor() {
+                const cursor = document.getElementById('brush-cursor');
+                const size = document.getElementById('size-slider').value * state.scale;
+                cursor.style.width = size + 'px'; cursor.style.height = size + 'px';
+                cursor.style.marginLeft = -(size/2) + 'px'; cursor.style.marginTop = -(size/2) + 'px';
+            },
+
+            createNew() {
+                const p = document.getElementById('res-preset').value;
+                if(p === 'custom') { state.w = +document.getElementById('in-w').value; state.h = +document.getElementById('in-h').value; }
+                else { [state.w, state.h] = p.split('x').map(Number); }
+                state.id = 'pj_' + Date.now();
+                state.name = document.getElementById('art-name-input').value || '無題の作品';
+                state.bgColor = '#ffffff';
+                this.setup(); 
+                this.save(); 
+                ui.closeCreate(); 
+                ui.closeProjects();
+            },
+
+            save() {
+                if(!state.id) return;
+                const list = JSON.parse(localStorage.getItem('canvas_pro_data') || '[]');
+                const combined = document.createElement('canvas');
+                combined.width = state.w; combined.height = state.h;
+                const cctx = combined.getContext('2d');
+                
+                const layerStates = layers.data.map(l => ({
+                    id: l.id,
+                    name: l.name,
+                    data: document.getElementById(l.id).toDataURL()
+                }));
+
+                layers.data.forEach(l => { if(l.vis) cctx.drawImage(document.getElementById(l.id), 0, 0); });
+                const thumb = combined.toDataURL('image/jpeg', 0.1);
+                
+                const idx = list.findIndex(p => p.id === state.id);
+                const info = { 
+                    id: state.id, name: state.name, w: state.w, h: state.h, 
+                    thumb, bgColor: state.bgColor, layers: layerStates 
+                };
+
+                if(idx === -1) list.unshift(info); else list[idx] = info;
+                localStorage.setItem('canvas_pro_data', JSON.stringify(list));
+                localStorage.setItem('canvas_last_id', state.id);
+            },
+
+            load(id) {
+                const list = JSON.parse(localStorage.getItem('canvas_pro_data') || '[]');
+                const p = list.find(x => x.id === id);
+                if(p) { 
+                    state.id = id; state.name = p.name; state.w = p.w; state.h = p.h; 
+                    state.bgColor = p.bgColor || '#ffffff'; 
+                    this.setup(p.layers || null); 
+                }
+                localStorage.setItem('canvas_last_id', id);
+                ui.closeProjects();
+            },
+
+            exportImage() {
+                const out = document.createElement('canvas');
+                out.width = state.w; out.height = state.h;
+                const octx = out.getContext('2d');
+                layers.data.forEach(l => { if(l.vis) octx.drawImage(document.getElementById(l.id), 0, 0); });
+
+                const now = new Date();
+                const ts = now.toISOString().replace(/[:.]/g, '-');
+                const name = state.name.replace(/\s+/g, '_');
+                const a = document.createElement('a');
+                a.download = `Art-${name}_${ts}.png`;
+                a.href = out.toDataURL('image/png');
+                a.click();
+            }
+        };
+
+        const ui = {
+            openProjects() { this.renderProjects(); document.getElementById('project-modal').style.display = 'flex'; },
+            closeProjects() { document.getElementById('project-modal').style.display = 'none'; },
+            showCreate() { 
+                const cats = Object.keys(randomNames);
+                const names = randomNames[cats[Math.floor(Math.random() * cats.length)]];
+                document.getElementById('art-name-input').value = names[Math.floor(Math.random() * names.length)];
+                document.getElementById('create-modal').style.display = 'flex'; 
+            },
+            closeCreate() { document.getElementById('create-modal').style.display = 'none'; },
+            onPresetChange() { document.getElementById('custom-fields').style.display = document.getElementById('res-preset').value === 'custom' ? 'flex' : 'none'; },
+            toggleTheme() {
+                const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                document.body.setAttribute('data-theme', t);
+                document.getElementById('mode-icon').innerText = t === 'dark' ? 'dark_mode' : 'light_mode';
+            },
+            deleteProject(id, e) {
+                e.stopPropagation();
+                if(!confirm('作品を削除しますか？')) return;
+                let list = JSON.parse(localStorage.getItem('canvas_pro_data') || '[]');
+                list = list.filter(p => p.id !== id);
+                localStorage.setItem('canvas_pro_data', JSON.stringify(list));
+                if(state.id === id) localStorage.removeItem('canvas_last_id');
+                this.renderProjects();
+            },
+            renderProjects() {
+                const list = JSON.parse(localStorage.getItem('canvas_pro_data') || '[]');
+                const container = document.getElementById('project-list');
+                container.innerHTML = list.map(p => `
+                    <div class="project-card" onclick="app.load('${p.id}')">
+                        <div class="thumb-prev"><img src="${p.thumb || ''}"></div>
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:14px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
+                            <div style="font-size:10px; color:var(--sub);">${p.w} x ${p.h}</div>
+                        </div>
+                        <button class="btn" style="color:var(--danger); width:32px;" onclick="ui.deleteProject('${p.id}', event)"><span class="material-symbols-rounded">delete</span></button>
+                    </div>
+                `).join('') || '<div style="text-align:center; padding:40px; color:var(--sub); font-size: 13px;">ギャラリーは空です</div>';
+            }
+        };
+
+        document.getElementById('size-slider').oninput = (e) => { 
+            document.getElementById('sz-num').innerText = e.target.value; 
+            app.updateCursor();
+        };
+
+        window.onload = () => app.boot();
+    </script>
+</body>
+
+</html>
+
