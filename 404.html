@@ -92,7 +92,7 @@
     <div class="title-bar">
       <div class="title-bar-text">Error: 404 Not Found</div>
       <div class="title-bar-controls">
-        <button aria-label="Close" onclick="location.href='/'"></button>
+        <button id="close-btn" aria-label="Close"></button>
       </div>
     </div>
 
@@ -106,7 +106,7 @@
       </div>
 
       <div class="back-btn-wrapper">
-        <button onclick="location.href='/'">トップページへ戻る</button>
+        <button id="back-btn">トップページへ戻る</button>
       </div>
 
       <footer>
@@ -135,13 +135,24 @@
       });
 
       const host = location.hostname.toLowerCase();
+      const isGithubPages = host.endsWith("github.io");
+      const pathSegments = location.pathname.split("/").filter(Boolean);
+      const repoBase = isGithubPages && pathSegments.length > 0 ? `/${pathSegments[0]}/` : "/";
+      const homeUrl = `${location.origin}${repoBase}`;
+
+      const backBtn = document.getElementById("back-btn");
+      if (backBtn) backBtn.addEventListener("click", () => { location.href = homeUrl; });
+
+      const closeBtn = document.getElementById("close-btn");
+      if (closeBtn) closeBtn.addEventListener("click", () => { location.href = homeUrl; });
+
       const container = document.getElementById("footer-link-container");
       if (!container) return;
 
       let linkHref = "";
       let linkText = "";
 
-      if (host.includes("hamusata.f5.si")) {
+      if (host.includes("pixel-art.hamusata.f5.si") || host === "hamusata.f5.si") {
         linkHref = "https://hamusata.f5.si";
         linkText = "@hamusata";
       } else if (host === "hamuzon.github.io" || host === "hamuzon-jp.f5.si") {
