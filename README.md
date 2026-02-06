@@ -32,6 +32,16 @@ Added palette color deletion. UI brushed up, file size reduced, and internal cod
 
 ---
 
+### v2.1
+
+**EN:**  
+Changed the way palette colors work.
+
+**JA:**  
+パレットの色の仕組みを変更。
+
+---
+
 ## Pixel Drawing Site / Pixel のえかきさいと
 
 A simple pixel drawing web application.  
