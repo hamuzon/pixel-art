@@ -238,7 +238,7 @@
         fileLoadInput.addEventListener("change", e => {
             const file = e.target.files[0];
             if (!file) return alert("ファイルが選択されていません。");
-            if (!file.name.endsWith(".json")) return alert("JSONファイルを選択してください。");
+            if (!file.name.toLowerCase().endsWith(".json")) return alert("JSONファイルを選択してください。");
 
             const reader = new FileReader();
             reader.onload = ev => {
