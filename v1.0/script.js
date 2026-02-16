@@ -212,12 +212,24 @@
     wrapper.style.border = "2px outset buttonface";
     wrapper.style.padding = "12px";
     wrapper.style.zIndex = "9999";
+    wrapper.style.display = "flex";
+    wrapper.style.alignItems = "center";
+    wrapper.style.gap = "8px";
+
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "×";
+
     wrapper.appendChild(select);
     wrapper.appendChild(saveBtn);
+    wrapper.appendChild(closeBtn);
     document.body.appendChild(wrapper);
 
     saveBtn.addEventListener("click", () => {
       saveImage(select.value);
+      wrapper.remove();
+    });
+
+    closeBtn.addEventListener("click", () => {
       wrapper.remove();
     });
 

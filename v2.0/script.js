@@ -157,11 +157,14 @@
         const old = $("img-ui"); if (old) old.remove();
         const ui = document.createElement("div");
         ui.id = "img-ui";
-        ui.style = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#c0c0c0;border:2px outset;padding:12px;z-index:9999";
+        ui.style = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#c0c0c0;border:2px outset;padding:12px;z-index:9999;display:flex;align-items:center;gap:8px";
         const sel = document.createElement("select");
         ["png", "jpeg"].forEach(f => { const opt = document.createElement("option"); opt.value = f; opt.textContent = f.toUpperCase(); sel.appendChild(opt); });
         const btn = document.createElement("button");
         btn.textContent = "保存";
+        const close = document.createElement("button");
+        close.textContent = "×";
+        close.onclick = () => ui.remove();
         btn.onclick = () => {
             const cvs = document.createElement("canvas");
             cvs.width = WIDTH; cvs.height = HEIGHT;
@@ -181,7 +184,7 @@
                 ui.remove();
             }, `image/${sel.value}`);
         };
-        ui.appendChild(sel); ui.appendChild(btn);
+        ui.appendChild(sel); ui.appendChild(btn); ui.appendChild(close);
         document.body.appendChild(ui);
     };
 
