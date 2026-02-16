@@ -188,7 +188,7 @@
             return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,"0")}-${d.getDate().toString().padStart(2,"0")}_${d.getHours().toString().padStart(2,"0")}-${d.getMinutes().toString().padStart(2,"0")}-${d.getSeconds().toString().padStart(2,"0")}`;
         };
         a.href = url;
-        a.download = `${APP_NAME}-V${APP_VERSION}_${ts()}.Json`;
+        a.download = `${APP_NAME}-V${APP_VERSION}_${ts()}.json`;
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -238,7 +238,7 @@
         fileLoadInput.addEventListener("change", e => {
             const file = e.target.files[0];
             if (!file) return alert("ファイルが選択されていません。");
-            if (!file.name.endsWith(".json")) return alert("JSONファイルを選択してください。");
+            if (!file.name.toLowerCase().endsWith(".json")) return alert("JSONファイルを選択してください。");
 
             const reader = new FileReader();
             reader.onload = ev => {
