@@ -143,9 +143,12 @@
         const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
-        const ts = () => { const d = new Date(); return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,"0")}-${d.getDate().toString().padStart(2,"0")}`; };
+        const ts = () => {
+            const d = new Date();
+            return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,"0")}-${d.getDate().toString().padStart(2,"0")}_${d.getHours().toString().padStart(2,"0")}-${d.getMinutes().toString().padStart(2,"0")}-${d.getSeconds().toString().padStart(2,"0")}`;
+        };
         a.href = url;
-        a.download = `${APP_NAME}-V${APP_VERSION}_${ts()}.json`;
+        a.download = `${APP_NAME}-V${APP_VERSION}_${ts()}.Json`;
         a.click();
         URL.revokeObjectURL(url);
     };
