@@ -228,28 +228,52 @@
         document.body.appendChild(ui);
     };
 
-    if ($("btn-load")) $("btn-load").onclick = () => { fileLoadInput.value = null; fileLoadInput.click(); };
-    if (fileLoadInput) fileLoadInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return alert("ファイルが選択されていません。");
-        if (!file.name.toLowerCase().endsWith(".json")) return alert("JSONファイルを選択してください。");
+    const loadBtn = $("btn-load");
+    if (loadBtn && fileLoadInput) {
+        loadBtn.addEventListener("click", () => {
+            fileLoadInput.value = null;
+            fileLoadInput.click();
+        });
 
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            try {
-                const d = JSON.parse(ev.target.result);
-                const version = validateLoadedData(d, { showAlert: true });
-                if (!version) return;
+        fileLoadInput.addEventListener("change", e => {
+            const file = e.target.files[0];
+            if (!file) return alert("ファイルが選択されていません。");
+            if (!file.name.endsWith(".json")) return alert("JSONファイルを選択してください。");
 
-                applyLoadedData(d);
-                saveToLocal();
-                alert(`読み込み成功: Version ${version}`);
-            } catch (err) {
-                alert("JSONファイルの読み込みに失敗しました。");
-            }
-        };
-        reader.readAsText(file);
-    };
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    const appName = String(data.a || data.app || "").trim();
+                    const version = getDataVersion(data);
+                    const pxData = data.px || data.pixels;
+                    const plData = data.pl || data.palette;
+
+                    if (appName && appName !== APP_NAME) { alert("このデータはこのアプリのものではありません。"); return; }
+                    if (!SUPPORTED_VERSIONS.includes(version)) {
+                        alert(`サポートされていないバージョンです。
+対応: ${SUPPORTED_VERSIONS.join(", ")}
+読み込んだ: ${version || "(不明)"}`);
+                        return;
+                    }
+                    if ((data.width && data.width !== WIDTH) || (data.height && data.height !== HEIGHT)) { alert("キャンバスサイズが異なります。"); return; }
+                    if (!Array.isArray(pxData)) { alert("ピクセルデータが不正です。"); return; }
+                    if (plData !== undefined && !Array.isArray(plData)) { alert("パレットデータが不正です。"); return; }
+
+                    if (Array.isArray(plData)) { palette = plData; createPalette(); }
+                    else { createPalette(); }
+
+                    decompress(pxData);
+                    titleInput.value = data.t || data.title || "";
+                    saveToLocal();
+                    alert(`バージョン ${version} の作品を読み込みました。`);
+                } catch {
+                    alert("JSONファイルの読み込みに失敗しました。");
+                }
+            };
+            reader.readAsText(file);
+        });
+    }
 
     if ($("btn-add-color")) $("btn-add-color").onclick = () => {
         const old = $("color-ui"); if (old) old.remove();
