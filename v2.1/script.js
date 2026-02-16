@@ -126,7 +126,7 @@
             return null;
         };
 
-        if (appName && appName !== APP_NAME) return fail("このデータはこのアプリのものではありません。");
+        if (appName !== APP_NAME) return fail("このデータはこのアプリのものではありません。");
 
         if (!SUPPORTED_VERSIONS.includes(version)) {
             return fail(`サポートされていないバージョンです。
@@ -249,7 +249,7 @@
                     const pxData = data.px || data.pixels;
                     const plData = data.pl || data.palette;
 
-                    if (appName && appName !== APP_NAME) { alert("このデータはこのアプリのものではありません。"); return; }
+                    if (appName !== APP_NAME) { alert("このデータはこのアプリのものではありません。"); return; }
                     if (!SUPPORTED_VERSIONS.includes(version)) {
                         alert(`サポートされていないバージョンです。
 対応: ${SUPPORTED_VERSIONS.join(", ")}
