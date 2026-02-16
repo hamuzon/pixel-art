@@ -104,6 +104,46 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     };
 
+    const SUPPORTED_VERSIONS = ["1.0", "1.1", "2.0", "2.1"];
+
+    const applyLoadedData = (d) => {
+        palette = d.pl || d.palette || [...FIXED_COLORS_START, FIXED_COLOR_END];
+        titleInput.value = d.t || d.title || "";
+        createPalette();
+        decompress(d.px || d.pixels);
+    };
+
+    const getDataVersion = (d) => String(d?.v || d?.version || "").trim();
+
+    const validateLoadedData = (d, { showAlert = false } = {}) => {
+        const appName = String(d?.a || d?.app || "").trim();
+        const version = getDataVersion(d);
+        const pxData = d?.px || d?.pixels;
+        const plData = d?.pl || d?.palette;
+
+        const fail = (message) => {
+            if (showAlert) alert(message);
+            return null;
+        };
+
+        if (appName && appName !== APP_NAME) return fail("このデータはこのアプリのものではありません。");
+
+        if (!SUPPORTED_VERSIONS.includes(version)) {
+            return fail(`サポートされていないバージョンです。
+対応: ${SUPPORTED_VERSIONS.join(", ")}
+読み込んだ: ${version || "(不明)"}`);
+        }
+
+        if ((d?.width && d.width !== WIDTH) || (d?.height && d.height !== HEIGHT)) {
+            return fail("キャンバスサイズが異なります。");
+        }
+
+        if (!Array.isArray(pxData)) return fail("ピクセルデータが不正です。");
+        if (plData !== undefined && !Array.isArray(plData)) return fail("パレットデータが不正です。");
+
+        return version;
+    };
+
     // --- フッター・コピーライト更新処理 ---
     const updateFooter = () => {
         // 年の表示
@@ -191,17 +231,22 @@
     if ($("btn-load")) $("btn-load").onclick = () => { fileLoadInput.value = null; fileLoadInput.click(); };
     if (fileLoadInput) fileLoadInput.onchange = (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file) return alert("ファイルが選択されていません。");
+        if (!file.name.toLowerCase().endsWith(".json")) return alert("JSONファイルを選択してください。");
+
         const reader = new FileReader();
         reader.onload = (ev) => {
             try {
                 const d = JSON.parse(ev.target.result);
-                palette = d.pl || d.palette || [...FIXED_COLORS_START, FIXED_COLOR_END];
-                titleInput.value = d.t || d.title || "";
-                createPalette();
-                decompress(d.px || d.pixels);
+                const version = validateLoadedData(d, { showAlert: true });
+                if (!version) return;
+
+                applyLoadedData(d);
                 saveToLocal();
-            } catch (err) { alert("読み込み失敗"); }
+                alert(`読み込み成功: Version ${version}`);
+            } catch (err) {
+                alert("JSONファイルの読み込みに失敗しました。");
+            }
         };
         reader.readAsText(file);
     };
@@ -258,10 +303,9 @@
         if (saved) {
             try {
                 const d = JSON.parse(saved);
-                palette = d.pl || d.palette || [...FIXED_COLORS_START, FIXED_COLOR_END];
-                titleInput.value = d.t || d.title || "";
-                createPalette();
-                decompress(d.px || d.pixels);
+                const version = validateLoadedData(d);
+                if (!version) throw new Error("INVALID_CACHED_DATA");
+                applyLoadedData(d);
             } catch (e) { createPalette(); }
         } else {
             createPalette();
