@@ -2,6 +2,7 @@
 body {
   background: #008080;
   font-family: "MS Gothic", monospace, monospace;
+  -webkit-user-select: none;
   user-select: none;
   margin: 0;
   display: flex;
@@ -57,6 +58,7 @@ h1 .subtitle {
   font-weight: bold;
   color: #000080;
   text-shadow: 1px 1px #fff;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -118,6 +120,7 @@ h1 .subtitle {
   left: 12px;
   font-weight: bold;
   color: black;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -164,6 +167,7 @@ h1 .subtitle {
   font-size: 1rem;
   border: 2px outset buttonface;
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
   min-width: 120px;
   flex-grow: 1;
@@ -186,7 +190,13 @@ footer {
   text-align: center;
   font-size: 14px;
   color: #000080;
+  -webkit-user-select: none;
   user-select: none;
+}
+
+/* フッター初期非表示 (JSで制御) */
+#footer-hamusata, #footer-hamuzon, #footer-other {
+  display: none;
 }
 
 /* モバイル対応 */

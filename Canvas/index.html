@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     
     <title>Canvas App</title>
     
@@ -106,8 +106,8 @@
 
         .glass {
             background: var(--panel);
-            backdrop-filter: var(--glass);
             -webkit-backdrop-filter: var(--glass);
+            backdrop-filter: var(--glass);
             border: 1px solid var(--border);
         }
 
@@ -258,6 +258,48 @@
             #layer-panel { top: 70px; right: 10px; width: 200px; max-height: 40vh; }
             #brush-cursor { display: none !important; }
         }
+
+        /* Utility Classes for replacing inline styles */
+        .hidden { display: none; }
+        .modal-title { margin-bottom: 20px; font-weight: 900; }
+        .modal-scroll { max-height: 300px; overflow-y: auto; margin-bottom: 20px; }
+        .btn-text { background: none; }
+        .input-text { width: 100%; padding: 16px; margin: 20px 0; border-radius: 14px; background: var(--input); color: var(--text); border: 1px solid var(--border); font-weight: 700; }
+        .select-base { width: 100%; padding: 14px; border-radius: 14px; background: var(--input); color: var(--text); border: 1px solid var(--border); margin-bottom: 20px; }
+        .custom-fields { display: none; gap: 12px; margin-bottom: 20px; }
+        .input-num { width: 48%; padding: 14px; background: var(--input); color: var(--text); border-radius: 12px; border: none; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-title { font-size: 16px; font-weight: 900; color: var(--accent); letter-spacing: 1px; }
+        .header-right { display: flex; gap: 6px; }
+        .layer-header { display: flex; justify-content: space-between; align-items: center; }
+        .layer-title { font-size: 11px; font-weight: 900; color: var(--accent); opacity: 0.8; }
+        .layer-add-btn { width: 32px; height: 32px; background: var(--accent); color: #fff; border-radius: 10px; }
+        .footer-content { display: flex; align-items: center; gap: 16px; }
+        .color-preview { position: relative; width: 48px; height: 48px; border-radius: 50%; border: 3px solid var(--text); overflow: hidden; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .color-input { position: absolute; top: -10px; left: -10px; width: 70px; height: 70px; cursor: pointer; border: none; }
+        .slider-container { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .size-label { font-size: 14px; font-weight: 900; width: 35px; text-align: right; }
+        
+        /* Initial states */
+        #project-modal, #create-modal { display: none; }
+        
+        /* Layer item styles */
+        .layer-vis-btn { width: 28px; height: 28px; }
+        .layer-actions { display: flex; gap: 2px; }
+        .layer-bg-preview { position: relative; width: 28px; height: 28px; overflow: hidden; }
+        .layer-bg-icon { font-size: 20px; color: var(--accent); }
+        .layer-bg-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .layer-move-btn { width: 28px; height: 28px; }
+        .layer-del-btn { width: 28px; height: 28px; color: var(--danger); }
+        .icon-18 { font-size: 18px; }
+        .icon-20 { font-size: 20px; }
+        
+        /* Project card styles */
+        .project-info { flex: 1; min-width: 0; }
+        .project-name { font-size: 14px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .project-size { font-size: 10px; color: var(--sub); }
+        .project-del-btn { color: var(--danger); width: 32px; }
+        .empty-gallery { text-align: center; padding: 40px; color: var(--sub); font-size: 13px; }
     </style>
 </head>
 
@@ -265,43 +307,43 @@
 
     <div id="brush-cursor"></div>
 
-    <div id="project-modal" class="modal-overlay" style="display:none;">
+    <div id="project-modal" class="modal-overlay">
         <div class="modal-content glass">
-            <h2 style="margin-bottom:20px; font-weight: 900;">GALLERY</h2>
-            <div id="project-list" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;"></div>
+            <h2 class="modal-title">GALLERY</h2>
+            <div id="project-list" class="modal-scroll"></div>
             <button class="primary-btn" onclick="ui.showCreate()">新規作成</button>
-            <button class="primary-btn" style="background:none;" onclick="ui.closeProjects()">戻る</button>
+            <button class="primary-btn btn-text" onclick="ui.closeProjects()">戻る</button>
         </div>
     </div>
 
-    <div id="create-modal" class="modal-overlay" style="display:none;">
+    <div id="create-modal" class="modal-overlay">
         <div class="modal-content glass">
             <h2 style="font-weight: 900;">NEW ARTWORK</h2>
-            <input type="text" id="art-name-input" placeholder="名前を入力..." style="width:100%; padding:16px; margin:20px 0; border-radius:14px; background:var(--input); color:var(--text); border:1px solid var(--border); font-weight: 700;">
+            <input type="text" id="art-name-input" placeholder="名前を入力..." class="input-text" aria-label="作品名">
             
-            <select id="res-preset" onchange="ui.onPresetChange()" style="width:100%; padding:14px; border-radius:14px; background:var(--input); color:var(--text); border:1px solid var(--border); margin-bottom:20px;">
+            <select id="res-preset" onchange="ui.onPresetChange()" class="select-base" aria-label="キャンバスサイズプリセット">
                 <option value="1080x1080" selected>正方形 (1080x1080)</option>
                 <option value="1280x720">横長 (1280x720)</option>
                 <option value="720x1280">縦長 (720x1280)</option>
                 <option value="custom">カスタムサイズ</option>
             </select>
             
-            <div id="custom-fields" style="display:none; gap:12px; margin-bottom:20px;">
-                <input type="number" id="in-w" value="1080" style="width:48%; padding:14px; background:var(--input); color:var(--text); border-radius:12px; border:none;">
-                <input type="number" id="in-h" value="1080" style="width:48%; padding:14px; background:var(--input); color:var(--text); border-radius:12px; border:none;">
+            <div id="custom-fields" class="custom-fields">
+                <input type="number" id="in-w" value="1080" class="input-num" aria-label="幅">
+                <input type="number" id="in-h" value="1080" class="input-num" aria-label="高さ">
             </div>
             
             <button class="primary-btn" onclick="app.createNew()">キャンバスを作成</button>
-            <button class="primary-btn" style="background:none;" onclick="ui.closeCreate()">キャンセル</button>
+            <button class="primary-btn btn-text" onclick="ui.closeCreate()">キャンセル</button>
         </div>
     </div>
 
     <header class="glass">
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div class="header-left">
             <button class="btn" onclick="ui.openProjects()"><span class="material-symbols-rounded">grid_view</span></button>
-            <h1 style="font-size:16px; font-weight:900; color:var(--accent); letter-spacing: 1px;">CANVAS APP</h1>
+            <h1 class="header-title">CANVAS APP</h1>
         </div>
-        <div style="display:flex; gap:6px;">
+        <div class="header-right">
             <button class="btn" onclick="app.undo()"><span class="material-symbols-rounded">undo</span></button>
             <button class="btn" onclick="app.redo()"><span class="material-symbols-rounded">redo</span></button>
             <button class="btn" onclick="ui.toggleTheme()"><span class="material-symbols-rounded" id="mode-icon">dark_mode</span></button>
@@ -317,10 +359,10 @@
     </nav>
 
     <aside id="layer-panel" class="glass">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:11px; font-weight:900; color:var(--accent); opacity: 0.8;">LAYERS</span>
-            <button class="btn" style="width:32px; height:32px; background:var(--accent); color:#fff; border-radius:10px;" onclick="layers.add()">
-                <span class="material-symbols-rounded" style="font-size:20px;">add</span>
+        <div class="layer-header">
+            <span class="layer-title">LAYERS</span>
+            <button class="btn layer-add-btn" onclick="layers.add()" aria-label="レイヤーを追加">
+                <span class="material-symbols-rounded icon-20">add</span>
             </button>
         </div>
         <div id="layer-list"></div>
@@ -333,14 +375,14 @@
     </main>
 
     <footer id="bottom-bar" class="glass">
-        <div style="display:flex; align-items:center; gap:16px;">
-            <div style="position:relative; width:48px; height:48px; border-radius:50%; border:3px solid var(--text); overflow:hidden; flex-shrink:0; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-                <input type="color" id="color-pick" value="#000000" style="position:absolute; top:-10px; left:-10px; width:70px; height:70px; cursor:pointer; border:none;">
+        <div class="footer-content">
+            <div class="color-preview">
+                <input type="color" id="color-pick" value="#000000" class="color-input" aria-label="ブラシ色">
             </div>
-            <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-                <input type="range" id="size-slider" min="1" max="300" value="20">
+            <div class="slider-container">
+                <input type="range" id="size-slider" min="1" max="300" value="20" aria-label="ブラシサイズ">
             </div>
-            <span id="sz-num" style="font-size:14px; font-weight:900; width:35px; text-align: right;">20</span>
+            <span id="sz-num" class="size-label">20</span>
         </div>
     </footer>
 
@@ -527,20 +569,20 @@
                     div.className = `layer-item ${l.id === this.activeId ? 'active' : ''}`;
                     div.onclick = () => this.select(l.id);
                     div.innerHTML = `
-                        <button class="btn" style="width:28px; height:28px;" onclick="layers.toggle('${l.id}', event)">
-                            <span class="material-symbols-rounded" style="font-size:18px;">${l.vis ? 'visibility' : 'visibility_off'}</span>
+                        <button class="btn layer-vis-btn" onclick="layers.toggle('${l.id}', event)">
+                            <span class="material-symbols-rounded icon-18">${l.vis ? 'visibility' : 'visibility_off'}</span>
                         </button>
-                        <input class="layer-name" value="${l.name}" ${l.lock ? 'readonly' : ''} onchange="layers.data.find(x=>x.id==='${l.id}').name=this.value" onclick="event.stopPropagation()">
-                        <div style="display:flex; gap:2px;">
+                        <input class="layer-name" value="${l.name}" ${l.lock ? 'readonly' : ''} onchange="layers.data.find(x=>x.id==='${l.id}').name=this.value" onclick="event.stopPropagation()" aria-label="レイヤー名">
+                        <div class="layer-actions">
                             ${l.lock ? `
-                                <div style="position:relative; width:28px; height:28px; overflow:hidden;">
-                                    <span class="material-symbols-rounded" style="font-size:20px; color:var(--accent);">palette</span>
-                                    <input type="color" value="${state.bgColor}" oninput="layers.updateBg(this.value)" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+                                <div class="layer-bg-preview">
+                                    <span class="material-symbols-rounded layer-bg-icon">palette</span>
+                                    <input type="color" value="${state.bgColor}" oninput="layers.updateBg(this.value)" class="layer-bg-input" aria-label="背景色">
                                 </div>
                             ` : `
-                                <button class="btn" style="width:28px; height:28px;" onclick="layers.move('${l.id}', 1, event)"><span class="material-symbols-rounded" style="font-size:18px;">expand_less</span></button>
-                                <button class="btn" style="width:28px; height:28px;" onclick="layers.move('${l.id}', -1, event)"><span class="material-symbols-rounded" style="font-size:18px;">expand_more</span></button>
-                                <button class="btn" style="width:28px; height:28px; color:var(--danger);" onclick="layers.remove('${l.id}', event)"><span class="material-symbols-rounded" style="font-size:18px;">delete</span></button>
+                                <button class="btn layer-move-btn" onclick="layers.move('${l.id}', 1, event)"><span class="material-symbols-rounded icon-18">expand_less</span></button>
+                                <button class="btn layer-move-btn" onclick="layers.move('${l.id}', -1, event)"><span class="material-symbols-rounded icon-18">expand_more</span></button>
+                                <button class="btn layer-del-btn" onclick="layers.remove('${l.id}', event)"><span class="material-symbols-rounded icon-18">delete</span></button>
                             `}
                         </div>
                     `;
@@ -812,13 +854,13 @@
                 container.innerHTML = list.map(p => `
                     <div class="project-card" onclick="app.load('${p.id}')">
                         <div class="thumb-prev"><img src="${p.thumb || ''}"></div>
-                        <div style="flex:1; min-width:0;">
-                            <div style="font-size:14px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</div>
-                            <div style="font-size:10px; color:var(--sub);">${p.w} x ${p.h}</div>
+                        <div class="project-info">
+                            <div class="project-name">${p.name}</div>
+                            <div class="project-size">${p.w} x ${p.h}</div>
                         </div>
-                        <button class="btn" style="color:var(--danger); width:32px;" onclick="ui.deleteProject('${p.id}', event)"><span class="material-symbols-rounded">delete</span></button>
+                        <button class="btn project-del-btn" onclick="ui.deleteProject('${p.id}', event)"><span class="material-symbols-rounded">delete</span></button>
                     </div>
-                `).join('') || '<div style="text-align:center; padding:40px; color:var(--sub); font-size: 13px;">ギャラリーは空です</div>';
+                `).join('') || '<div class="empty-gallery">ギャラリーは空です</div>';
             }
         };
 
@@ -832,4 +874,3 @@
 </body>
 
 </html>
-

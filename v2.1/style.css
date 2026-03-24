@@ -10,6 +10,7 @@ html,body {
 
 body {
   font-family: "MS UI Gothic", "MS Gothic", sans-serif;
+  -webkit-user-select: none;
   user-select: none;
   display: flex;
   justify-content: center;
