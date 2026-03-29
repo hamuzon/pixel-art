@@ -117,6 +117,14 @@
   </main>
 
   <script>
+    // README/LICENSE へのアクセス（大文字小文字問わず）を判定してリダイレクト
+    (function() {
+      const path = window.location.pathname.toLowerCase();
+      if (path.includes('readme') || path.includes('license')) {
+        window.location.replace('./');
+      }
+    })();
+
     (() => {
       const startYear = 2025;
       const currentYear = new Date().getFullYear();
