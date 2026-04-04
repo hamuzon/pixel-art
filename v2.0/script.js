@@ -117,9 +117,13 @@
 
     const validateLoadedData = (d, { showAlert = false } = {}) => {
         const appName = String(d?.a || d?.app || "").trim();
-        const version = getDataVersion(d);
+        let version = getDataVersion(d);
         const pxData = d?.px || d?.pixels;
         const plData = d?.pl || d?.palette;
+
+        if (version === "1.0" && Array.isArray(plData) && plData.length > 7) {
+            version = "1.1"; // パレットが多いのに v1.0 判定になっている場合の救済
+        }
 
         const fail = (message) => {
             if (showAlert) alert(message);
@@ -240,9 +244,13 @@
                 try {
                     const data = JSON.parse(ev.target.result);
                     const appName = String(data.a || data.app || "").trim();
-                    const version = getDataVersion(data);
+                    let version = getDataVersion(data);
                     const pxData = data.px || data.pixels;
                     const plData = data.pl || data.palette;
+
+                    if (version === "1.0" && Array.isArray(plData) && plData.length > 7) {
+                        version = "1.1"; // パレットが多いのに v1.0 判定になっている場合の救済
+                    }
 
                     if (appName !== APP_NAME) { alert("【エラー: アプリが異なります】\nこのファイルは PixelDraw のデータではありません。\n違うアプリで保存されたか、ファイルが破損している可能性があります。"); return; }
                     if (!SUPPORTED_VERSIONS.includes(version)) {
