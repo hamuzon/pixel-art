@@ -117,29 +117,28 @@
 
     const validateLoadedData = (d, { showAlert = false } = {}) => {
         const appName = String(d?.a || d?.app || "").trim();
-        const version = getDataVersion(d);
+        let version = getDataVersion(d);
         const pxData = d?.px || d?.pixels;
         const plData = d?.pl || d?.palette;
+
+        if (version === "1.0" && Array.isArray(plData) && plData.length > 7) {
+            version = "1.1"; // パレットが多いのに v1.0 判定になっている場合の救済
+        }
 
         const fail = (message) => {
             if (showAlert) alert(message);
             return null;
         };
 
-        if (appName !== APP_NAME) return fail("このデータはこのアプリのものではありません。");
-
+        if (appName !== APP_NAME) return fail("【エラー: アプリが異なります】\nこのファイルは PixelDraw のデータではありません。\n違うアプリで保存されたか、ファイルが破損している可能性があります。");
         if (!SUPPORTED_VERSIONS.includes(version)) {
-            return fail(`サポートされていないバージョンです。
-対応: ${SUPPORTED_VERSIONS.join(", ")}
-読み込んだ: ${version || "(不明)"}`);
+            return fail(`【エラー: 非対応のバージョンです】\nこのページ（v${APP_VERSION}）では、読み込んだバージョン（v${version || "不明"}）に対応していません。\n新しいバージョンで保存されたデータの場合は、新しいページで開いてください。`);
         }
-
         if ((d?.width && d.width !== WIDTH) || (d?.height && d.height !== HEIGHT)) {
-            return fail("キャンバスサイズが異なります。");
+            return fail(`【エラー: キャンバスサイズ不一致】\nこのページのサイズは ${WIDTH}x${HEIGHT} ですが、読み込んだデータはサイズが異なります。`);
         }
-
-        if (!Array.isArray(pxData)) return fail("ピクセルデータが不正です。");
-        if (plData !== undefined && !Array.isArray(plData)) return fail("パレットデータが不正です。");
+        if (!Array.isArray(pxData)) return fail("【エラー: データ破損】\nピクセルデータが正しく読み込めません。ファイルが破損している可能性があります。");
+        if (plData !== undefined && !Array.isArray(plData)) return fail("【エラー: データ破損】\nパレットデータが正しく読み込めません。ファイルが破損している可能性があります。");
 
         return version;
     };
@@ -245,20 +244,22 @@
                 try {
                     const data = JSON.parse(ev.target.result);
                     const appName = String(data.a || data.app || "").trim();
-                    const version = getDataVersion(data);
+                    let version = getDataVersion(data);
                     const pxData = data.px || data.pixels;
                     const plData = data.pl || data.palette;
 
-                    if (appName !== APP_NAME) { alert("このデータはこのアプリのものではありません。"); return; }
+                    if (version === "1.0" && Array.isArray(plData) && plData.length > 7) {
+                        version = "1.1"; // パレットが多いのに v1.0 判定になっている場合の救済
+                    }
+
+                    if (appName !== APP_NAME) { alert("【エラー: アプリが異なります】\nこのファイルは PixelDraw のデータではありません。\n違うアプリで保存されたか、ファイルが破損している可能性があります。"); return; }
                     if (!SUPPORTED_VERSIONS.includes(version)) {
-                        alert(`サポートされていないバージョンです。
-対応: ${SUPPORTED_VERSIONS.join(", ")}
-読み込んだ: ${version || "(不明)"}`);
+                        alert(`【エラー: 非対応のバージョンです】\nこのページ（v${APP_VERSION}）では、読み込んだバージョン（v${version || "不明"}）に対応していません。\n新しいバージョンで保存されたデータの場合は、新しいページで開いてください。`);
                         return;
                     }
-                    if ((data.width && data.width !== WIDTH) || (data.height && data.height !== HEIGHT)) { alert("キャンバスサイズが異なります。"); return; }
-                    if (!Array.isArray(pxData)) { alert("ピクセルデータが不正です。"); return; }
-                    if (plData !== undefined && !Array.isArray(plData)) { alert("パレットデータが不正です。"); return; }
+                    if ((data.width && data.width !== WIDTH) || (data.height && data.height !== HEIGHT)) { alert(`【エラー: キャンバスサイズ不一致】\nこのページのサイズは ${WIDTH}x${HEIGHT} ですが、読み込んだデータはサイズが異なります。`); return; }
+                    if (!Array.isArray(pxData)) { alert("【エラー: データ破損】\nピクセルデータが正しく読み込めません。ファイルが破損している可能性があります。"); return; }
+                    if (plData !== undefined && !Array.isArray(plData)) { alert("【エラー: データ破損】\nパレットデータが正しく読み込めません。ファイルが破損している可能性があります。"); return; }
 
                     if (Array.isArray(plData)) { palette = plData; createPalette(); }
                     else { createPalette(); }
@@ -268,7 +269,7 @@
                     saveToLocal();
                     alert(`バージョン ${version} の作品を読み込みました。`);
                 } catch {
-                    alert("JSONファイルの読み込みに失敗しました。");
+                    alert("【エラー: 読み込み失敗】\nファイルの中身を読み取れませんでした。\nファイル形式が正しいJSONファイルか確認してください。");
                 }
             };
             reader.readAsText(file);
