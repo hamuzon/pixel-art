@@ -10,8 +10,10 @@ const appTranslations = {
     "update-v1.1": "COLOR 追加対応。削除はボードリセットか保存JSONデータ編集のみ。",
     "update-v2.0": "パレットの色削除に対応。UIブラッシュアップ、ファイルサイズ縮小、内部コード改良。",
     "update-v2.1": "パレットの色の仕組みを変更。",
+    "version-auto-detect-note": "※一部のバージョンではパレット数を元に読み込みバージョンを自動判別します",
     
     // Editor pages
+    "label-lang-select": "言語を選択",
     "label-title": "作品名:",
     "placeholder-title": "作品名を入力してください",
     "btn-add-color": "色を追加",
@@ -46,8 +48,10 @@ const appTranslations = {
     "update-v1.1": "Added COLOR support. Deletion requires board reset or editing the saved JSON.",
     "update-v2.0": "Added palette color deletion. UI brushed up, file size reduced, internal code improved.",
     "update-v2.1": "Changed the palette color mechanism.",
+    "version-auto-detect-note": "*Note: Some versions automatically detect the loading version based on the number of palette colors.",
 
     // Editor pages
+    "label-lang-select": "Select Language",
     "label-title": "Title:",
     "placeholder-title": "Enter artwork title",
     "btn-add-color": "Add Color",
@@ -82,6 +86,14 @@ window.i18nSetLanguage = function(lang) {
     const key = el.getAttribute("data-i18n");
     if (appTranslations[lang] && appTranslations[lang][key]) {
       el.textContent = appTranslations[lang][key];
+    }
+  });
+
+  // Translate aria-labels if data-i18n-label exists
+  document.querySelectorAll("[data-i18n-label]").forEach(el => {
+    const key = el.getAttribute("data-i18n-label");
+    if (appTranslations[lang] && appTranslations[lang][key]) {
+      el.setAttribute("aria-label", appTranslations[lang][key]);
     }
   });
 

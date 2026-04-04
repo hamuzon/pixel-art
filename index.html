@@ -7,6 +7,27 @@
   <link rel="stylesheet" href="https://unpkg.com/98.css" />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="https://hamusata.f5.si/icon.svg" type="image/svg+xml" />
+  <style>
+    .version-note {
+      display: block;
+      margin-top: 5px;
+      font-size: 0.75em;
+      opacity: 0.5;
+    }
+    .main-footer {
+      text-align: center;
+      border-top: 1px solid #808080;
+      padding-top: 10px;
+      margin-top: 1rem;
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  </style>
 </head>
 <body>
   <main class="window" role="main">
@@ -47,14 +68,14 @@
           <strong>v2.1:</strong> <span data-i18n="update-v2.1">パレットの色の仕組みを変更。</span>
         </article>
       </section>
-      <small style="display: block; margin-top: 5px; font-size: 0.75em; opacity: 0.5;">
+      <small class="version-note" data-i18n="version-auto-detect-note">
         ※一部のバージョンではパレット数を元に読み込みバージョンを自動判別します
       </small>
 
-      <footer style="text-align: center; border-top: 1px solid #808080; padding-top: 10px; margin-top: 1rem;">
-        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <footer class="main-footer">
+        <div class="footer-inner">
           <div class="lang-switcher">
-            <select id="lang-select">
+            <select id="lang-select" aria-label="Select Language" data-i18n-label="label-lang-select">
               <option value="ja">日本語</option>
               <option value="en">English</option>
             </select>
