@@ -85,6 +85,11 @@ footer {
   width: 100%;
 }
 
+.lang-switcher select {
+  font-family: inherit;
+  font-size: 11px;
+}
+
 @media (max-width: 480px) {
   h1 .title-part {
     display: block;
@@ -95,5 +100,8 @@ footer {
   }
   .window-body {
     padding: 1rem;
+  }
+  .lang-switcher {
+    text-align: center !important;
   }
 }
