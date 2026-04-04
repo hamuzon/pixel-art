@@ -173,9 +173,11 @@
     reader.onload = ev => {
       try {
         const data = JSON.parse(ev.target.result);
-        if (data.app !== APP_NAME) { alert("このデータはこのアプリのものではありません。"); return; }
-        if (!SUPPORTED_VERSIONS.includes(data.version)) {
-          alert(`サポートされていないバージョンです。\n対応: ${SUPPORTED_VERSIONS.join(", ")}\n読み込んだ: ${data.version}`);
+        const appName = data.app || data.a;
+        const version = data.version || data.v;
+        if (appName !== APP_NAME) { alert("このデータはこのアプリのものではありません。"); return; }
+        if (!SUPPORTED_VERSIONS.includes(version)) {
+          alert(`サポートされていないバージョンです。\n対応: ${SUPPORTED_VERSIONS.join(", ")}\n読み込んだ: ${version || "(不明)"}`);
           return;
         }
         if (data.width !== WIDTH || data.height !== HEIGHT) { alert("キャンバスサイズが異なります。"); return; }

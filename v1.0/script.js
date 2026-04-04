@@ -127,12 +127,14 @@
     reader.onload = ev => {
       try {
         const data = JSON.parse(ev.target.result);
-        if(data.app !== APP_NAME){
+        const appName = data.app || data.a;
+        const version = data.version || data.v;
+        if(appName !== APP_NAME){
           alert("このデータはこのアプリのものではありません。");
           return;
         }
-        if(!SUPPORTED_VERSIONS.includes(data.version)){
-          alert(`サポートされていないバージョンです。\n対応バージョン: ${SUPPORTED_VERSIONS.join(", ")}\n読み込んだバージョン: ${data.version}`);
+        if(!SUPPORTED_VERSIONS.includes(version)){
+          alert(`サポートされていないバージョンです。\n対応バージョン: ${SUPPORTED_VERSIONS.join(", ")}\n読み込んだバージョン: ${version || "(不明)"}`);
           return;
         }
         if(data.width !== WIDTH || data.height !== HEIGHT){
