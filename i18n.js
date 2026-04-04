@@ -99,7 +99,12 @@ window.i18nSetLanguage = function(lang) {
 };
 
 window.i18nGetLanguage = function() {
-  return localStorage.getItem("app-lang") || (navigator.language.startsWith("ja") ? "ja" : "en");
+  const saved = localStorage.getItem("app-lang");
+  if (saved && appTranslations[saved]) return saved;
+  
+  // Auto-detect browser language
+  const browserLang = navigator.language.split('-')[0]; // e.g., 'ja-JP' -> 'ja'
+  return appTranslations[browserLang] ? browserLang : "en";
 };
 
 window.i18nGetText = function(key) {
