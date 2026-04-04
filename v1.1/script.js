@@ -175,20 +175,20 @@
         const data = JSON.parse(ev.target.result);
         const appName = data.app || data.a;
         const version = data.version || data.v;
-        if (appName !== APP_NAME) { alert("このデータはこのアプリのものではありません。"); return; }
+        if (appName !== APP_NAME) { alert("【エラー: アプリが異なります】\nこのファイルは PixelDraw のデータではありません。\n違うアプリで保存されたか、ファイルが破損している可能性があります。"); return; }
         if (!SUPPORTED_VERSIONS.includes(version)) {
-          alert(`サポートされていないバージョンです。\n対応: ${SUPPORTED_VERSIONS.join(", ")}\n読み込んだ: ${version || "(不明)"}`);
+          alert(`【エラー: 非対応のバージョンです】\nこのページ（v${APP_VERSION}）では、読み込んだバージョン（v${version || "不明"}）に対応していません。\n新しいバージョンで保存されたデータの場合は、新しいページで開いてください。`);
           return;
         }
-        if (data.width !== WIDTH || data.height !== HEIGHT) { alert("キャンバスサイズが異なります。"); return; }
-        if (!Array.isArray(data.pixels)) { alert("ピクセルデータが不正です。"); return; }
+        if (data.width !== WIDTH || data.height !== HEIGHT) { alert(`【エラー: キャンバスサイズ不一致】\nこのページのサイズは ${WIDTH}x${HEIGHT} ですが、読み込んだデータはサイズが異なります。`); return; }
+        if (!Array.isArray(data.pixels)) { alert("【エラー: データ破損】\nピクセルデータが正しく読み込めません。ファイルが破損している可能性があります。"); return; }
         if (Array.isArray(data.palette)) { palette = data.palette; createPalette(); }
         fillCanvasWithCompressedPixels(data.pixels);
         titleInput.value = data.title || "";
         saveToLocalStorage();
-        alert(`バージョン ${data.version} の作品を読み込みました。`);
+        alert(`バージョン ${version || data.version} の作品を読み込みました。`);
       } catch {
-        alert("JSONファイルの読み込みに失敗しました。");
+        alert("【エラー: 読み込み失敗】\nファイルの中身を読み取れませんでした。\nファイル形式が正しいJSONファイルか確認してください。");
       }
     };
     reader.readAsText(file);
