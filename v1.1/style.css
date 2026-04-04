@@ -141,18 +141,20 @@ h1 .subtitle {
 /* ============================= */
 #canvas {
   display: grid;
-  grid-template-columns: repeat(16, 24px);
+  grid-template-columns: repeat(16, 1fr);
   grid-gap: 2px;
   border: 2px outset buttonface;
   background-color: #c0c0c0;
+  width: min(calc(100vw - 80px), 500px);
   max-width: 100%;
   aspect-ratio: 1 / 1;
   touch-action: none;
+  box-sizing: border-box;
 }
 
 .pixel {
-  width: 24px;
-  height: 24px;
+  width: 100%;
+  height: 100%;
   background-color: transparent;
   border: 2px inset buttonface;
   cursor: pointer;
@@ -249,13 +251,11 @@ footer {
 
   /* キャンバスサイズ調整 */
   #canvas {
-    grid-template-columns: repeat(16, 20px);
     grid-gap: 1px;
+    width: min(calc(100vw - 40px), 400px);
   }
 
   .pixel {
-    width: 20px;
-    height: 20px;
     border-width: 1px;
   }
 }
