@@ -69,6 +69,7 @@
     if (isTouchDevice) {
       const input = document.createElement("input");
       input.type = "color";
+      input.setAttribute("aria-label", window.i18nGetText("label-color-pick"));
       input.style.display = "none";
       document.body.appendChild(input);
       input.click();
@@ -81,6 +82,7 @@
     } else {
       const input = document.createElement("input");
       input.type = "color";
+      input.setAttribute("aria-label", window.i18nGetText("label-color-pick"));
       input.value = "#ffffff";
       input.style.position = "fixed";
       input.style.left = "-9999px";
@@ -220,6 +222,7 @@
 
     const select = document.createElement("select");
     select.id = "img-format-select";
+    select.setAttribute("aria-label", window.i18nGetText("label-img-format"));
     formats.forEach(f => {
       const option = document.createElement("option");
       option.value = f;

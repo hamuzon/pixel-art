@@ -264,6 +264,7 @@
         .modal-title { margin-bottom: 20px; font-weight: 900; }
         .modal-scroll { max-height: 300px; overflow-y: auto; margin-bottom: 20px; }
         .btn-text { background: none; }
+        .btn-accent { color: var(--accent); }
         .input-text { width: 100%; padding: 16px; margin: 20px 0; border-radius: 14px; background: var(--input); color: var(--text); border: 1px solid var(--border); font-weight: 700; }
         .select-base { width: 100%; padding: 14px; border-radius: 14px; background: var(--input); color: var(--text); border: 1px solid var(--border); margin-bottom: 20px; }
         .custom-fields { display: none; gap: 12px; margin-bottom: 20px; }
@@ -318,7 +319,7 @@
 
     <div id="create-modal" class="modal-overlay">
         <div class="modal-content glass">
-            <h2 style="font-weight: 900;">NEW ARTWORK</h2>
+            <h2 class="modal-title">NEW ARTWORK</h2>
             <input type="text" id="art-name-input" placeholder="名前を入力..." class="input-text" aria-label="作品名">
             
             <select id="res-preset" onchange="ui.onPresetChange()" class="select-base" aria-label="キャンバスサイズプリセット">
@@ -347,7 +348,7 @@
             <button class="btn" onclick="app.undo()"><span class="material-symbols-rounded">undo</span></button>
             <button class="btn" onclick="app.redo()"><span class="material-symbols-rounded">redo</span></button>
             <button class="btn" onclick="ui.toggleTheme()"><span class="material-symbols-rounded" id="mode-icon">dark_mode</span></button>
-            <button class="btn" onclick="app.exportImage()" style="color:var(--accent);"><span class="material-symbols-rounded">download</span></button>
+            <button class="btn btn-accent" onclick="app.exportImage()"><span class="material-symbols-rounded">download</span></button>
         </div>
     </header>
 

@@ -199,6 +199,7 @@
         ui.id = "img-ui";
         ui.style = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#c0c0c0;border:2px outset;padding:12px;z-index:9999;display:flex;align-items:center;gap:8px";
         const sel = document.createElement("select");
+        sel.setAttribute("aria-label", window.i18nGetText("label-img-format"));
         ["png", "jpeg"].forEach(f => { const opt = document.createElement("option"); opt.value = f; opt.textContent = f.toUpperCase(); sel.appendChild(opt); });
         const btn = document.createElement("button");
         btn.textContent = "保存";
@@ -280,6 +281,7 @@
 
     if ($("btn-add-color")) $("btn-add-color").onclick = () => {
         const pk = document.createElement("input"); pk.type = "color";
+        pk.setAttribute("aria-label", window.i18nGetText("label-color-pick"));
         pk.onchange = () => { palette.splice(palette.length - 1, 0, pk.value); currentColorIndex = palette.length - 2; createPalette(); saveToLocal(); };
         pk.click();
     };

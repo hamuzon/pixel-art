@@ -179,11 +179,25 @@ h1 .subtitle {
 }
 
 footer {
-  padding: 4px;
+  margin-top: 1rem;
+  border-top: 1px solid #808080;
+  padding-top: 10px;
+  padding-bottom: 4px;
+  padding-left: 4px;
+  padding-right: 4px;
   text-align: center;
   font-size: 11px;
   color: #000080;
   flex-shrink: 0;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
 }
 
 @media (max-width: 650px) {
