@@ -117,7 +117,8 @@
 
     const validateLoadedData = (d, { showAlert = false } = {}) => {
         const appName = String(d?.a || d?.app || "").trim();
-        let version = getDataVersion(d);
+        const fileVersion = getDataVersion(d);
+        let version = fileVersion;
         const pxData = d?.px || d?.pixels;
         const plData = d?.pl || d?.palette;
 
@@ -132,7 +133,7 @@
 
         if (appName !== APP_NAME) return fail(window.i18nGetText("alert-wrong-app"));
         if (!SUPPORTED_VERSIONS.includes(version)) {
-            return fail(`${window.i18nGetText("alert-unsupported-version")}\n(v${version || "unknown"})`);
+            return fail(`${window.i18nGetText("alert-unsupported-version")}\n(v${fileVersion})`);
         }
         if ((d?.width && d.width !== WIDTH) || (d?.height && d.height !== HEIGHT)) {
             return fail(window.i18nGetText("alert-canvas-size"));
@@ -244,7 +245,8 @@
                 try {
                     const data = JSON.parse(ev.target.result);
                     const appName = String(data.a || data.app || "").trim();
-                    let version = getDataVersion(data);
+                    const fileVersion = getDataVersion(data);
+                    let version = fileVersion;
                     const pxData = data.px || data.pixels;
                     const plData = data.pl || data.palette;
 
@@ -254,7 +256,7 @@
 
                     if (appName !== APP_NAME) { alert(window.i18nGetText("alert-wrong-app")); return; }
                     if (!SUPPORTED_VERSIONS.includes(version)) {
-                        alert(`${window.i18nGetText("alert-unsupported-version")}\n(v${version || "unknown"})`);
+                        alert(`${window.i18nGetText("alert-unsupported-version")}\n(v${fileVersion})`);
                         return;
                     }
                     if ((data.width && data.width !== WIDTH) || (data.height && data.height !== HEIGHT)) { alert(window.i18nGetText("alert-canvas-size")); return; }
@@ -267,7 +269,7 @@
                     decompress(pxData);
                     titleInput.value = data.t || data.title || "";
                     saveToLocal();
-                    alert(`${window.i18nGetText("alert-load-success")}\n(v${version})`);
+                    alert(`${window.i18nGetText("alert-load-success")}\n(v${fileVersion})`);
                 } catch {
                     alert(window.i18nGetText("alert-load-fail"));
                 }
