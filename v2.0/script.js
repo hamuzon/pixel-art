@@ -117,7 +117,8 @@
 
     const validateLoadedData = (d, { showAlert = false } = {}) => {
         const appName = String(d?.a || d?.app || "").trim();
-        let version = getDataVersion(d);
+        const fileVersion = getDataVersion(d);
+        let version = fileVersion;
         const pxData = d?.px || d?.pixels;
         const plData = d?.pl || d?.palette;
 
@@ -244,7 +245,8 @@
                 try {
                     const data = JSON.parse(ev.target.result);
                     const appName = String(data.a || data.app || "").trim();
-                    let version = getDataVersion(data);
+                    const fileVersion = getDataVersion(data);
+                    let version = fileVersion;
                     const pxData = data.px || data.pixels;
                     const plData = data.pl || data.palette;
 
