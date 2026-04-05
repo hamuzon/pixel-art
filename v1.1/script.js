@@ -177,7 +177,7 @@
         const version = data.version || data.v;
         if (appName !== APP_NAME) { alert(window.i18nGetText("alert-wrong-app")); return; }
         if (!SUPPORTED_VERSIONS.includes(version)) {
-          alert(window.i18nGetText("alert-unsupported-version"));
+          alert(`${window.i18nGetText("alert-unsupported-version")}\n(v${version || "unknown"})`);
           return;
         }
         if (data.width !== WIDTH || data.height !== HEIGHT) { alert(window.i18nGetText("alert-canvas-size")); return; }

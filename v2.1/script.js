@@ -132,7 +132,7 @@
 
         if (appName !== APP_NAME) return fail(window.i18nGetText("alert-wrong-app"));
         if (!SUPPORTED_VERSIONS.includes(version)) {
-            return fail(window.i18nGetText("alert-unsupported-version"));
+            return fail(`${window.i18nGetText("alert-unsupported-version")}\n(v${version || "unknown"})`);
         }
         if ((d?.width && d.width !== WIDTH) || (d?.height && d.height !== HEIGHT)) {
             return fail(window.i18nGetText("alert-canvas-size"));
@@ -254,7 +254,7 @@
 
                     if (appName !== APP_NAME) { alert(window.i18nGetText("alert-wrong-app")); return; }
                     if (!SUPPORTED_VERSIONS.includes(version)) {
-                        alert(window.i18nGetText("alert-unsupported-version"));
+                        alert(`${window.i18nGetText("alert-unsupported-version")}\n(v${version || "unknown"})`);
                         return;
                     }
                     if ((data.width && data.width !== WIDTH) || (data.height && data.height !== HEIGHT)) { alert(window.i18nGetText("alert-canvas-size")); return; }
