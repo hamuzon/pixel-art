@@ -134,7 +134,7 @@
           return;
         }
         if(!SUPPORTED_VERSIONS.includes(version)){
-          alert(window.i18nGetText("alert-unsupported-version"));
+          alert(`${window.i18nGetText("alert-unsupported-version")}\n(v${version})`);
           return;
         }
         if(data.width !== WIDTH || data.height !== HEIGHT){
