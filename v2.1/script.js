@@ -267,7 +267,7 @@
                     decompress(pxData);
                     titleInput.value = data.t || data.title || "";
                     saveToLocal();
-                    alert(window.i18nGetText("alert-load-success"));
+                    alert(`${window.i18nGetText("alert-load-success")}\n${window.i18nGetText("alert-load-version")}: v${version}`);
                 } catch {
                     alert(window.i18nGetText("alert-load-fail"));
                 }

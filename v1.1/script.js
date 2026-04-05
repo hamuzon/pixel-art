@@ -186,7 +186,7 @@
         fillCanvasWithCompressedPixels(data.pixels);
         titleInput.value = data.title || "";
         saveToLocalStorage();
-        alert(window.i18nGetText("alert-load-success"));
+        alert(`${window.i18nGetText("alert-load-success")}\n${window.i18nGetText("alert-load-version")}: v${version}`);
       } catch {
         alert(window.i18nGetText("alert-load-fail"));
       }
