@@ -19,8 +19,8 @@
 
 
     <div id="titleContainer">
-      <label id="title-label" for="titleInput">作品名（任意）:</label>
-      <input type="text" id="titleInput" placeholder="作品名を入力してください" autocomplete="off" />
+      <label id="title-label" for="titleInput" data-i18n="label-title">作品名:</label>
+      <input type="text" id="titleInput" placeholder="作品名を入力してください" data-i18n-placeholder="placeholder-title" autocomplete="off" />
     </div>
 
     <section id="app-container" aria-label="描画エリアとパレット">
@@ -29,7 +29,7 @@
       <nav id="palette" role="list" aria-label="色パレット"></nav>
 
       <!-- ➕ 色追加ボタン -->
-      <button id="btn-add-color" type="button">色を追加</button>
+      <button id="btn-add-color" type="button" data-i18n="btn-add-color">色を追加</button>
 
       <!-- 🖌️ キャンバス -->
       <div id="canvas" role="grid" aria-label="ピクセル描画キャンバス" tabindex="0"></div>
@@ -38,35 +38,33 @@
 
     <section id="controls" aria-label="操作ボタン">
 
-      <button id="btn-reset" type="button">ボードをリセット</button>
-      <button id="btn-save" type="button">JSONで保存</button>
-      <button id="btn-load" type="button">JSON読み込み</button>
-      <button id="btn-img-save" type="button">画像保存</button>
+      <button id="btn-reset" type="button" data-i18n="btn-reset">ボードをリセット</button>
+      <button id="btn-save" type="button" data-i18n="btn-save">JSONで保存</button>
+      <button id="btn-load" type="button" data-i18n="btn-load">JSON読み込み</button>
+      <button id="btn-img-save" type="button" data-i18n="btn-img-save">画像保存</button>
 
       <!-- 📂 ファイル選択は非表示 -->
       <input type="file" id="file-load" accept=".json" style="display:none" />
 
     </section>
 
-    <footer>
-      <span id="footer-hamusata" style="display:none;">
-        &copy; <span id="year-hamusata"></span> v1.1 Pixel Drawing. All rights reserved.
-        <a href="https://home.hamusata.f5.si" target="_blank" rel="noopener noreferrer">@hamusata</a>
-      </span>
-
-      <span id="footer-hamuzon" style="display:none;">
-        &copy; <span id="year-hamuzon"></span> v1.1 Pixel Drawing. All rights reserved.
-        <a id="link-hamuzon" href="https://github.com/Hamuzon" target="_blank" rel="noopener noreferrer">@hamuzon</a>
-      </span>
-
-      <span id="footer-other" style="display:none;">
-        &copy; <span id="year-other"></span> v1.1 Pixel Drawing. All rights reserved.
-      </span>
+    <footer style="margin-top: 1rem; border-top: 1px solid #808080; padding-top: 10px;">
+      <div style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12px;">
+        <div class="lang-switcher">
+          <select id="lang-select">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div id="footer-content">
+          &copy; <span class="year"></span> v1.1 Pixel Drawing. All rights reserved.
+        </div>
+      </div>
     </footer>
 
   </main>
 
+  <script src="../i18n.js"></script>
   <script src="script.js" defer></script>
-  <script src="footer-switch.js" defer></script>
 </body>
 </html>

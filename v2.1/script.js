@@ -130,15 +130,15 @@
             return null;
         };
 
-        if (appName !== APP_NAME) return fail("【エラー: アプリが異なります】\nこのファイルは PixelDraw のデータではありません。\n違うアプリで保存されたか、ファイルが破損している可能性があります。");
+        if (appName !== APP_NAME) return fail(window.i18nGetText("alert-wrong-app"));
         if (!SUPPORTED_VERSIONS.includes(version)) {
-            return fail(`【エラー: 非対応のバージョンです】\nこのページ（v${APP_VERSION}）では、読み込んだバージョン（v${version || "不明"}）に対応していません。\n新しいバージョンで保存されたデータの場合は、新しいページで開いてください。`);
+            return fail(window.i18nGetText("alert-unsupported-version"));
         }
         if ((d?.width && d.width !== WIDTH) || (d?.height && d.height !== HEIGHT)) {
-            return fail(`【エラー: キャンバスサイズ不一致】\nこのページのサイズは ${WIDTH}x${HEIGHT} ですが、読み込んだデータはサイズが異なります。`);
+            return fail(window.i18nGetText("alert-canvas-size"));
         }
-        if (!Array.isArray(pxData)) return fail("【エラー: データ破損】\nピクセルデータが正しく読み込めません。ファイルが破損している可能性があります。");
-        if (plData !== undefined && !Array.isArray(plData)) return fail("【エラー: データ破損】\nパレットデータが正しく読み込めません。ファイルが破損している可能性があります。");
+        if (!Array.isArray(pxData)) return fail(window.i18nGetText("alert-data-corrupt"));
+        if (plData !== undefined && !Array.isArray(plData)) return fail(window.i18nGetText("alert-data-corrupt"));
 
         return version;
     };
@@ -236,8 +236,8 @@
 
         fileLoadInput.addEventListener("change", e => {
             const file = e.target.files[0];
-            if (!file) return alert("ファイルが選択されていません。");
-            if (!file.name.toLowerCase().endsWith(".json")) return alert("JSONファイルを選択してください。");
+            if (!file) return alert(window.i18nGetText("alert-file-not-selected"));
+            if (!file.name.toLowerCase().endsWith(".json")) return alert(window.i18nGetText("alert-require-json"));
 
             const reader = new FileReader();
             reader.onload = ev => {
@@ -252,14 +252,14 @@
                         version = "1.1"; // パレットが多いのに v1.0 判定になっている場合の救済
                     }
 
-                    if (appName !== APP_NAME) { alert("【エラー: アプリが異なります】\nこのファイルは PixelDraw のデータではありません。\n違うアプリで保存されたか、ファイルが破損している可能性があります。"); return; }
+                    if (appName !== APP_NAME) { alert(window.i18nGetText("alert-wrong-app")); return; }
                     if (!SUPPORTED_VERSIONS.includes(version)) {
-                        alert(`【エラー: 非対応のバージョンです】\nこのページ（v${APP_VERSION}）では、読み込んだバージョン（v${version || "不明"}）に対応していません。\n新しいバージョンで保存されたデータの場合は、新しいページで開いてください。`);
+                        alert(window.i18nGetText("alert-unsupported-version"));
                         return;
                     }
-                    if ((data.width && data.width !== WIDTH) || (data.height && data.height !== HEIGHT)) { alert(`【エラー: キャンバスサイズ不一致】\nこのページのサイズは ${WIDTH}x${HEIGHT} ですが、読み込んだデータはサイズが異なります。`); return; }
-                    if (!Array.isArray(pxData)) { alert("【エラー: データ破損】\nピクセルデータが正しく読み込めません。ファイルが破損している可能性があります。"); return; }
-                    if (plData !== undefined && !Array.isArray(plData)) { alert("【エラー: データ破損】\nパレットデータが正しく読み込めません。ファイルが破損している可能性があります。"); return; }
+                    if ((data.width && data.width !== WIDTH) || (data.height && data.height !== HEIGHT)) { alert(window.i18nGetText("alert-canvas-size")); return; }
+                    if (!Array.isArray(pxData)) { alert(window.i18nGetText("alert-data-corrupt")); return; }
+                    if (plData !== undefined && !Array.isArray(plData)) { alert(window.i18nGetText("alert-data-corrupt")); return; }
 
                     if (Array.isArray(plData)) { palette = plData; createPalette(); }
                     else { createPalette(); }
@@ -267,9 +267,9 @@
                     decompress(pxData);
                     titleInput.value = data.t || data.title || "";
                     saveToLocal();
-                    alert(`バージョン ${version} の作品を読み込みました。`);
+                    alert(window.i18nGetText("alert-load-success"));
                 } catch {
-                    alert("【エラー: 読み込み失敗】\nファイルの中身を読み取れませんでした。\nファイル形式が正しいJSONファイルか確認してください。");
+                    alert(window.i18nGetText("alert-load-fail"));
                 }
             };
             reader.readAsText(file);
@@ -292,17 +292,17 @@
 
     if ($("btn-remove-color")) $("btn-remove-color").onclick = () => {
         if (currentColorIndex < FIXED_COLORS_START.length || currentColorIndex === palette.length - 1) {
-            alert("この色は削除できません。"); return;
+            alert(window.i18nGetText("alert-cannot-delete-color")); return;
         }
         palette.splice(currentColorIndex, 1); currentColorIndex = 0; createPalette(); saveToLocal();
     };
 
     if ($("btn-reset-palette")) $("btn-reset-palette").onclick = () => {
-        if (confirm("パレットをリセットしますか？")) { palette = [...FIXED_COLORS_START, FIXED_COLOR_END]; currentColorIndex = 0; createPalette(); saveToLocal(); }
+        if (confirm(window.i18nGetText("confirm-reset-palette"))) { palette = [...FIXED_COLORS_START, FIXED_COLOR_END]; currentColorIndex = 0; createPalette(); saveToLocal(); }
     };
 
     if ($("btn-reset")) $("btn-reset").onclick = () => {
-        if (confirm("クリアしますか？")) { pixels.forEach(p => { p.style.backgroundColor = "transparent"; p.dataset.colorIndex = palette.length - 1; }); saveToLocal(); }
+        if (confirm(window.i18nGetText("confirm-clear-board"))) { pixels.forEach(p => { p.style.backgroundColor = "transparent"; p.dataset.colorIndex = palette.length - 1; }); saveToLocal(); }
     };
 
     // --- 描画イベント ---

@@ -10,24 +10,26 @@
 </head>
 <body>
   <main class="window" role="main" aria-label="ピクセルお絵かきアプリ">
-    <h1>
-      <span class="title-part">Pixel</span>
-      <span class="title-part">Drawing</span>
-      <span class="subtitle">- v2.1</span>
-    </h1>
+    <header>
+      <h1>
+        <span class="title-part">Pixel</span>
+        <span class="title-part">Drawing</span>
+        <span class="subtitle">- v2.1</span>
+      </h1>
+    </header>
 
     <div id="titleContainer">
-      <label id="title-label" for="titleInput">作品名:</label>
-      <input type="text" id="titleInput" placeholder="作品名を入力してください" autocomplete="off" />
+      <label id="title-label" for="titleInput" data-i18n="label-title">作品名:</label>
+      <input type="text" id="titleInput" placeholder="作品名を入力してください" data-i18n-placeholder="placeholder-title" autocomplete="off" />
     </div>
 
     <section id="app-container" aria-label="描画エリアとパレット">
       <div class="palette-wrapper">
         <nav id="palette" role="list" aria-label="色パレット"></nav>
         <div class="palette-controls">
-          <button id="btn-add-color" type="button">色を追加</button>
-          <button id="btn-remove-color" type="button">選択色を削除</button>
-          <button id="btn-reset-palette" type="button">初期化</button>
+          <button id="btn-add-color" type="button" data-i18n="btn-add-color">色を追加</button>
+          <button id="btn-remove-color" type="button" data-i18n="btn-remove-color">選択色を削除</button>
+          <button id="btn-reset-palette" type="button" data-i18n="btn-reset-palette">初期化</button>
         </div>
       </div>
 
@@ -35,18 +37,27 @@
     </section>
 
     <section id="controls" aria-label="操作ボタン">
-      <button id="btn-reset" type="button">ボードをリセット</button>
-      <button id="btn-save" type="button">JSONで保存</button>
-      <button id="btn-load" type="button">JSON読み込み</button>
-      <button id="btn-img-save" type="button">画像保存</button>
+      <button id="btn-reset" type="button" data-i18n="btn-reset">ボードをリセット</button>
+      <button id="btn-save" type="button" data-i18n="btn-save">JSONで保存</button>
+      <button id="btn-load" type="button" data-i18n="btn-load">JSON読み込み</button>
+      <button id="btn-img-save" type="button" data-i18n="btn-img-save">画像保存</button>
       <input type="file" id="file-load" accept=".json" hidden />
     </section>
 
-    <footer>
-      &copy; <span id="year"></span> v2.1 Pixel Drawing. All rights reserved.
+    <footer style="margin-top: 1rem; border-top: 1px solid #808080; padding-top: 10px;">
+      <div style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12px;">
+        <div class="lang-switcher">
+          <select id="lang-select">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div>&copy; <span id="year"></span> v2.1 Pixel Drawing. All rights reserved.</div>
+      </div>
     </footer>
   </main>
 
+  <script src="../i18n.js"></script>
   <script src="script.js" defer></script>
 </body>
 </html>

@@ -96,7 +96,7 @@
 
   // リセット
   resetBtn.addEventListener("click", () => {
-    if(confirm("本当にボードをリセットして全てクリアしますか？")){
+    if(confirm(window.i18nGetText("confirm-clear-board"))){
       canvasEl.querySelectorAll(".pixel").forEach(p => {
         p.style.backgroundColor = palette[palette.length-1]; // 透明
         delete p.dataset.colorIndex;
@@ -120,8 +120,8 @@
   // JSONファイル読み込み
   fileLoadInput.addEventListener("change", e => {
     const file = e.target.files[0];
-    if(!file) return alert("ファイルが選択されていません。");
-    if(!file.name.endsWith(".json")) return alert("JSONファイルを選択してください。");
+    if(!file) return alert(window.i18nGetText("alert-file-not-selected"));
+    if(!file.name.endsWith(".json")) return alert(window.i18nGetText("alert-require-json"));
 
     const reader = new FileReader();
     reader.onload = ev => {
@@ -130,23 +130,23 @@
         const appName = data.app || data.a;
         const version = data.version || data.v;
         if(appName !== APP_NAME){
-          alert("【エラー: アプリが異なります】\nこのファイルは PixelDraw のデータではありません。\n違うアプリで保存されたか、ファイルが破損している可能性があります。");
+          alert(window.i18nGetText("alert-wrong-app"));
           return;
         }
         if(!SUPPORTED_VERSIONS.includes(version)){
-          alert(`【エラー: 非対応のバージョンです】\nこのページ（v${APP_VERSION}）では、読み込んだバージョン（v${version || "不明"}）に対応していません。\n新しいバージョンで保存されたデータの場合は、新しいページで開いてください。`);
+          alert(window.i18nGetText("alert-unsupported-version"));
           return;
         }
         if(data.width !== WIDTH || data.height !== HEIGHT){
-          alert(`【エラー: キャンバスサイズ不一致】\nこのページのサイズは ${WIDTH}x${HEIGHT} ですが、読み込んだデータはサイズが異なります。`);
+          alert(window.i18nGetText("alert-canvas-size"));
           return;
         }
         if(!Array.isArray(data.pixels)){
-          alert("【エラー: データ破損】\nピクセルデータが正しく読み込めません。ファイルが破損している可能性があります。");
+          alert(window.i18nGetText("alert-data-corrupt"));
           return;
         }
         if(!Array.isArray(data.palette)){
-          alert("【エラー: データ破損】\nパレットデータが正しく読み込めません。ファイルが破損している可能性があります。");
+          alert(window.i18nGetText("alert-data-corrupt"));
           return;
         }
         if(JSON.stringify(data.palette) !== JSON.stringify(palette)){
@@ -158,9 +158,9 @@
         titleInput.value = data.title || "";
         saveToLocalStorage();
 
-        alert(`バージョン ${version || data.version} の作品を読み込みました。`);
+        alert(window.i18nGetText("alert-load-success"));
       } catch {
-        alert("【エラー: 読み込み失敗】\nファイルの中身を読み取れませんでした。\nファイル形式が正しいJSONファイルか確認してください。");
+        alert(window.i18nGetText("alert-load-fail"));
       }
     };
     reader.readAsText(file);
@@ -310,7 +310,7 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    alert("作品を保存しました。");
+    alert(window.i18nGetText("alert-load-success")); // Reusing success alert for save
   }
 
   // キャンバスの色インデックス取得
