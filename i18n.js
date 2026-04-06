@@ -23,6 +23,8 @@ const appTranslations = {
     "btn-save": "JSONで保存",
     "btn-load": "JSON読み込み",
     "btn-img-save": "画像保存",
+    "label-img-format": "保存形式を選択",
+    "label-color-pick": "色を選択",
     
     // Alerts
     "alert-file-not-selected": "ファイルが選択されていません。",
@@ -61,6 +63,8 @@ const appTranslations = {
     "btn-save": "Save as JSON",
     "btn-load": "Load JSON",
     "btn-img-save": "Save Image",
+    "label-img-format": "Select save format",
+    "label-color-pick": "Pick a color",
 
     // Alerts
     "alert-file-not-selected": "No file selected.",

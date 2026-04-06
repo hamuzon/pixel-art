@@ -194,6 +194,7 @@
 
     const select = document.createElement("select");
     select.id = "img-format-select";
+    select.setAttribute("aria-label", window.i18nGetText("label-img-format"));
     formats.forEach(f => {
       const option = document.createElement("option");
       option.value = f;
