@@ -259,3 +259,25 @@ footer {
     border-width: 1px;
   }
 }
+
+/* ============================= */
+/* Utility Classes               */
+/* ============================= */
+.hidden {
+  display: none !important;
+}
+
+.footer-container {
+  margin-top: 1rem;
+  border-top: 1px solid #808080;
+  padding-top: 10px;
+}
+
+.footer-content-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}

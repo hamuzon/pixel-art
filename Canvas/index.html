@@ -815,10 +815,11 @@
                 layers.data.forEach(l => { if(l.vis) octx.drawImage(document.getElementById(l.id), 0, 0); });
 
                 const now = new Date();
-                const ts = now.toISOString().replace(/[:.]/g, '-');
-                const name = state.name.replace(/\s+/g, '_');
+                const pad = n => n.toString().padStart(2,"0");
+                const tsStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+                const name = state.name.replace(/\s+/g, '_') || 'CanvasApp';
                 const a = document.createElement('a');
-                a.download = `Art-${name}_${ts}.png`;
+                a.download = `CanvasApp_${name}_${tsStr}.png`;
                 a.href = out.toDataURL('image/png');
                 a.click();
             }

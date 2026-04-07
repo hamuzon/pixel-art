@@ -44,14 +44,14 @@
       <button id="btn-img-save" type="button" data-i18n="btn-img-save">画像保存</button>
 
       <!-- 📂 ファイル選択は非表示 -->
-      <input type="file" id="file-load" accept=".json" style="display:none" />
+      <input type="file" id="file-load" accept=".json" class="hidden" title="Load JSON file" />
 
     </section>
 
-    <footer style="margin-top: 1rem; border-top: 1px solid #808080; padding-top: 10px;">
-      <div style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12px;">
+    <footer class="footer-container">
+      <div class="footer-content-wrapper">
         <div class="lang-switcher">
-          <select id="lang-select">
+          <select id="lang-select" title="Language selection">
             <option value="ja">日本語</option>
             <option value="en">English</option>
           </select>
