@@ -1,6 +1,6 @@
 (() => {
     // --- 定数 ---
-    const APP_NAME = "PixelDraw";
+    const APP_NAME = "Draw-art";
     const APP_VERSION = "2.1";
     const WIDTH = 16;
     const HEIGHT = 16;
