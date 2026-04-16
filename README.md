@@ -51,7 +51,7 @@ A simple pixel drawing web application.
 
 ## License
 
-This project is licensed under the [MIT License](#License).  
+This project is licensed under the [MIT License](License).  
 Feel free to use and modify it freely.
 
 ---
