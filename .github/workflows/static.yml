@@ -36,6 +36,7 @@ jobs:
       - name: Remove README and LICENSE from deployment artifact
         run: |
           # 大文字小文字を区別せず README と LICENSE に関連するファイルを削除
+          find . -maxdepth 1 -iname "readme.md" -delete
           find . -maxdepth 1 -iname "readme*" -delete
           find . -maxdepth 1 -iname "license*" -delete
         shell: bash
