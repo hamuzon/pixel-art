@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,19 +45,26 @@
     .message-area {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 1.2rem;
     }
 
-    .message-area p {
+    .message-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .message-item p {
       margin: 0;
-      font-size: clamp(0.9rem, 4vw, 1rem);
-      line-height: 1.6;
+      font-size: clamp(0.95rem, 4vw, 1.05rem);
+      line-height: 1.4;
     }
 
     .subtext {
-      color: #555;
+      color: #444;
       font-size: 0.85rem;
-      margin-top: 0.5rem;
+      line-height: 1.4;
+      font-family: inherit;
     }
 
     .back-btn-wrapper {
@@ -65,10 +73,19 @@
     }
 
     .back-btn-wrapper button {
-      min-width: 150px;
-      padding: 6px 24px;
+      min-width: 180px;
+      padding: 8px 20px;
       cursor: pointer;
       font-weight: bold;
+      font-family: inherit;
+    }
+
+    .btn-subtext {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: normal;
+      color: #333;
+      margin-top: 2px;
     }
 
     footer {
@@ -86,6 +103,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <main class="window" role="alertdialog">
@@ -100,13 +118,21 @@
       <h1>404</h1>
 
       <div class="message-area">
-        <p><strong>エラーが発生しました</strong></p>
-        <p>指定されたページは見つかりません。</p>
-        <p class="subtext">Sorry, Not Found.</p>
+        <div class="message-item">
+          <p><strong>エラーが発生しました</strong></p>
+          <span class="subtext">An error has occurred</span>
+        </div>
+        <div class="message-item">
+          <p>指定されたページは見つかりません。</p>
+          <span class="subtext">The page you are looking for doesn't exist or has been moved.</span>
+        </div>
       </div>
 
       <div class="back-btn-wrapper">
-        <button id="back-btn">トップページへ戻る</button>
+        <button id="back-btn">
+          トップページへ戻る
+          <span class="btn-subtext">Return to Home</span>
+        </button>
       </div>
 
       <footer>
@@ -117,8 +143,7 @@
   </main>
 
   <script>
-    // README/LICENSE へのアクセス（大文字小文字問わず）を判定してリダイレクト
-    (function() {
+    (function () {
       const path = window.location.pathname.toLowerCase();
       if (path.includes('readme') || path.includes('license')) {
         window.location.replace('./');
@@ -128,14 +153,14 @@
     (() => {
       const startYear = 2025;
       const currentYear = new Date().getFullYear();
-      
+
       let yearDisplay;
       if (startYear === currentYear) {
         yearDisplay = `${startYear}`;
       } else {
         const min = Math.min(startYear, currentYear);
         const max = Math.max(startYear, currentYear);
-        yearDisplay = `${min}~${max}`;
+        yearDisplay = `${min} ~ ${max}`;
       }
 
       document.querySelectorAll(".year").forEach(el => {
@@ -174,4 +199,5 @@
     })();
   </script>
 </body>
+
 </html>
