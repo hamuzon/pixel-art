@@ -6,10 +6,12 @@ const appTranslations = {
     "open-v1.1": "v1.1 を開く",
     "open-v2.0": "v2.0 を開く",
     "open-v2.1": "v2.1 を開く",
+    "open-v3.0": "v3.0 を開く",
     "update-v1.0": "正式版初回リリース。JSON保存・読込、画像保存 PNG/JPEG 対応。",
     "update-v1.1": "COLOR 追加対応。削除はボードリセットか保存JSONデータ編集のみ。",
     "update-v2.0": "パレットの色削除に対応。UIブラッシュアップ、ファイルサイズ縮小、内部コード改良。",
     "update-v2.1": "パレットの色の仕組みを変更。",
+    "update-v3.0": "追加した色の編集に対応。内部の保存や処理などを変更。",
     "version-auto-detect-note": "※一部のバージョンではパレット数を元に読み込みバージョンを自動判別します",
     
     // Editor pages
@@ -17,6 +19,7 @@ const appTranslations = {
     "label-title": "作品名:",
     "placeholder-title": "作品名を入力してください",
     "btn-add-color": "色を追加",
+    "btn-edit-color": "色を編集",
     "btn-remove-color": "選択色を削除",
     "btn-reset-palette": "初期化",
     "btn-reset": "ボードをリセット",
@@ -46,10 +49,12 @@ const appTranslations = {
     "open-v1.1": "Open v1.1",
     "open-v2.0": "Open v2.0",
     "open-v2.1": "Open v2.1",
+    "open-v3.0": "Open v3.0",
     "update-v1.0": "First official release. JSON save/load, PNG/JPEG image export supported.",
     "update-v1.1": "Added COLOR support. Deletion requires board reset or editing the saved JSON.",
     "update-v2.0": "Added palette color deletion. UI brushed up, file size reduced, internal code improved.",
     "update-v2.1": "Changed the palette color mechanism.",
+    "update-v3.0": "Added editing for user-added colors. Changed internal saving and processing mechanisms.",
     "version-auto-detect-note": "*Note: Some versions automatically detect the loading version based on the number of palette colors.",
 
     // Editor pages
@@ -57,6 +62,7 @@ const appTranslations = {
     "label-title": "Title:",
     "placeholder-title": "Enter artwork title",
     "btn-add-color": "Add Color",
+    "btn-edit-color": "Edit Color",
     "btn-remove-color": "Remove Color",
     "btn-reset-palette": "Reset",
     "btn-reset": "Reset Board",

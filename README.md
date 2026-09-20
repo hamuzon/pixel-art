@@ -42,6 +42,16 @@ Changed the way palette colors work.
 
 ---
 
+### v3.0
+
+**EN:**  
+Added editing for user-added colors. Changed internal saving and processing mechanisms.
+
+**JA:**  
+追加した色の編集に対応。内部の保存や処理などを変更。
+
+---
+
 ## Pixel Drawing Site / Pixel のえかきさいと
 
 A simple pixel drawing web application.  
