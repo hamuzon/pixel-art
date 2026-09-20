@@ -2,10 +2,10 @@
     // --- 定数 ---
     const APP_NAME = "PixelDraw";
     const ACCEPTED_APP_NAMES = ["PixelDraw", "art.pixel"];
-    const APP_VERSION = "2.1";
+    const APP_VERSION = "3.0";
     const WIDTH = 16;
     const HEIGHT = 16;
-    const STORAGE_KEY = "pixelDrawingData-v2.1";
+    const STORAGE_KEY = "pixelDrawingData-v3.0";
     const BASE_YEAR = 2025;
 
     // 固定パレット（最初からある6色 + 最後の透明1色）
@@ -26,12 +26,25 @@
     let isDrawing = false;
     const pixels = [];
 
+    // ユーザーが追加した色のみ返す（固定パレットと透明を除外）
+    const getAddedColors = () => {
+      // 固定色は最初のN個(FIXED_COLORS_START)、最後は透明色
+      return palette.slice(FIXED_COLORS_START.length, palette.length - 1);
+    };
+
     // --- 要素取得 ---
     const $ = id => document.getElementById(id);
     const paletteEl = $("palette");
     const canvasEl = $("canvas");
     const titleInput = $("titleInput");
     const fileLoadInput = $("file-load");
+    // 追加色の編集ボタン
+    const editColorBtn = $("btn-edit-color");
+    const updateEditButtonState = () => {
+        const isEditable = currentColorIndex >= FIXED_COLORS_START.length && currentColorIndex < palette.length - 1;
+        editColorBtn.disabled = !isEditable;
+        editColorBtn.style.opacity = isEditable ? "1" : "0.5";
+    };
 
     // --- 初期化：ピクセル生成 ---
     if (canvasEl) {
@@ -57,24 +70,24 @@
             const btn = document.createElement("div");
             const isTrans = color === FIXED_COLOR_END;
 
-            btn.className = `color-btn ${
-                isTrans ? "transparent" : ""
-            } ${
-                i === currentColorIndex ? "selected" : ""
-            }`;
-
+            // クラス名設定
+            btn.className = `color-btn ${isTrans ? "transparent" : ""} ${i === currentColorIndex ? "selected" : ""}`;
+            
             btn.style.backgroundColor = isTrans ? "transparent" : color;
-
+            
             btn.title =
                 i < FIXED_COLORS_START.length || i === palette.length - 1
                     ? `固定色: ${color}`
                     : `追加色: ${color}`;
-
+            
             btn.onclick = () => {
                 currentColorIndex = i;
                 createPalette();
+                updateEditButtonState();
             };
+            
 
+            
             paletteEl.appendChild(btn);
         });
     };
@@ -92,6 +105,7 @@
     };
 
     // --- データ圧縮 ---
+    // 固定色: [index, count], 追加色(index>=6): [index, "#hex", count]
     const compress = () => {
         const ids = pixels.map(p => Number(p.dataset.colorIndex));
         const res = [];
@@ -107,7 +121,12 @@
                 count++;
             }
 
-            res.push([val, count]);
+            // 追加色・透明色はカラーコード付きで保存
+            if (val >= FIXED_COLORS_START.length) {
+                res.push([val, palette[val], count]);
+            } else {
+                res.push([val, count]);
+            }
             i += count;
         }
 
@@ -123,8 +142,47 @@
         for (let i = 0; i < pxData.length; i++) {
             const val = pxData[i];
 
-            // v1.1互換
+            // v3.0: [index, "#hex", count] — 追加色のカラーコード付き
             if (
+                Array.isArray(val) &&
+                val.length === 3 &&
+                typeof val[0] === "number" &&
+                typeof val[1] === "string" &&
+                typeof val[2] === "number"
+            ) {
+                const colorIndex = val[0];
+                const hexColor = val[1];
+                const count = val[2];
+                // 透明色は常にパレットの最後（固定位置）に解決
+                if (hexColor === FIXED_COLOR_END) {
+                    const transIdx = palette.length - 1;
+                    for (let c = 0; c < count; c++) indices.push(transIdx);
+                }
+                // パレットにその色がなければ復元（インデックスの色と一致しない場合）
+                else if (palette[colorIndex] !== hexColor) {
+                    // パレット内で同じ色を探す
+                    const existingIdx = palette.indexOf(hexColor);
+                    if (existingIdx !== -1) {
+                        for (let c = 0; c < count; c++) indices.push(existingIdx);
+                    } else {
+                        // 追加色として挿入（透明色の前）
+                        const oldTransIdx = palette.length - 1;
+                        palette.splice(palette.length - 1, 0, hexColor);
+                        const newIdx = palette.length - 2;
+                        const newTransIdx = palette.length - 1;
+                        // 既に indices に記録された透明色のインデックスを新しい透明インデックスに追従
+                        for (let j = 0; j < indices.length; j++) {
+                            if (indices[j] === oldTransIdx) indices[j] = newTransIdx;
+                        }
+                        for (let c = 0; c < count; c++) indices.push(newIdx);
+                    }
+                } else {
+                    for (let c = 0; c < count; c++) indices.push(colorIndex);
+                }
+            }
+
+            // v1.1互換
+            else if (
                 Array.isArray(val) &&
                 val.length === 2 &&
                 typeof pxData[i + 1] === "number"
@@ -137,7 +195,7 @@
                 }
             }
 
-            // v2.1
+            // v2.1: [index, count]
             else if (
                 Array.isArray(val) &&
                 val.length === 2
@@ -154,10 +212,11 @@
         }
 
         pixels.forEach((p, i) => {
-            const idx =
-                indices[i] !== undefined
-                    ? indices[i]
-                    : palette.length - 1;
+            // 安全なカラーインデックス; 範囲外は透明にフォールバック
+            let idx = indices[i];
+            if (idx === undefined || idx < 0 || idx >= palette.length) {
+                idx = palette.length - 1; // 固定の透明色インデックス
+            }
 
             p.dataset.colorIndex = idx;
 
@@ -172,11 +231,14 @@
 
     // --- LocalStorage保存 ---
     const saveToLocal = () => {
+        // 追加色を [index, hex] ペアで保存 (index >= FIXED_COLORS_START.length)
+        const addedPairs = palette.slice(FIXED_COLORS_START.length, -1)
+            .map((c, idx) => [FIXED_COLORS_START.length + idx, c]);
         const data = {
             a: APP_NAME,
             v: APP_VERSION,
             t: titleInput ? titleInput.value : "",
-            pl: palette,
+            ac: addedPairs,            // v3.0: 追加色（インデックス付き）
             px: compress()
         };
 
@@ -191,15 +253,26 @@
         "1.0",
         "1.1",
         "2.0",
-        "2.1"
+        "2.1",
+        "3.0"
     ];
 
     // --- 読み込みデータ適用 ---
     const applyLoadedData = d => {
-        palette =
-            d.pl ||
-            d.palette ||
-            [...FIXED_COLORS_START, FIXED_COLOR_END];
+        // データからパレットを復元（透明色は常に最後）
+        if (Array.isArray(d.ac)) {
+            // v3.0形式: ac は [[index, "#hex"], ...] ペアまたは ["#hex", ...]
+            const addedColors = d.ac.map(entry =>
+                Array.isArray(entry) ? entry[1] : entry
+            );
+            palette = [...FIXED_COLORS_START, ...addedColors, FIXED_COLOR_END];
+        } else {
+            // 旧バージョン(v2.x等)のフルパレットから重複を除去して復元
+            const savedPalette = d.pl || d.palette || [...FIXED_COLORS_START, FIXED_COLOR_END];
+            const addedColors = savedPalette.filter(c => !FIXED_COLORS_START.includes(c) && c !== FIXED_COLOR_END);
+            const reconstructed = [...FIXED_COLORS_START, ...addedColors, FIXED_COLOR_END];
+            palette = reconstructed.filter((c, i) => reconstructed.indexOf(c) === i);
+        }
 
         if (titleInput) {
             titleInput.value =
@@ -261,7 +334,6 @@
             return null;
         };
 
-        // PixelDraw / art.pixel の両方を許可
         if (!ACCEPTED_APP_NAMES.includes(appName)) {
             return fail(
                 window.i18nGetText("alert-wrong-app")
@@ -371,13 +443,16 @@
     // --- JSON保存 ---
     if ($("btn-save")) {
         $("btn-save").onclick = () => {
+            const addedPairs = palette.slice(FIXED_COLORS_START.length, -1)
+                .map((c, idx) => [FIXED_COLORS_START.length + idx, c]);
             const data = {
                 a: APP_NAME,
                 v: APP_VERSION,
                 t: titleInput
                     ? titleInput.value.trim() || undefined
                     : undefined,
-                pl: palette,
+                pl: palette,          // 旧バージョン互換用フルパレット
+                ac: addedPairs,       // v3.0: 追加色（インデックス付き）
                 px: compress()
             };
 
@@ -625,34 +700,8 @@
                             return;
                         }
 
-                        if (
-                            Array.isArray(
-                                data.pl ||
-                                data.palette
-                            )
-                        ) {
-                            palette =
-                                data.pl ||
-                                data.palette;
-
-                            createPalette();
-                        }
-                        else {
-                            createPalette();
-                        }
-
-                        decompress(
-                            data.px ||
-                            data.pixels
-                        );
-
-                        if (titleInput) {
-                            titleInput.value =
-                                data.t ||
-                                data.title ||
-                                "";
-                        }
-
+                        applyLoadedData(data);
+                        updateEditButtonState();
                         saveToLocal();
 
                         alert(
@@ -720,16 +769,26 @@
             btn.textContent = "追加";
 
             btn.onclick = () => {
+                const oldTransIdx = palette.length - 1;
                 palette.splice(
                     palette.length - 1,
                     0,
                     pk.value
                 );
+                const newTransIdx = palette.length - 1;
+
+                // 透明色だったピクセルを新しい透明インデックスに追従
+                pixels.forEach(p => {
+                    if (Number(p.dataset.colorIndex) === oldTransIdx) {
+                        p.dataset.colorIndex = newTransIdx;
+                    }
+                });
 
                 currentColorIndex =
                     palette.length - 2;
 
                 createPalette();
+                updateEditButtonState();
                 saveToLocal();
 
                 ui.remove();
@@ -757,9 +816,9 @@
         $("btn-remove-color").onclick = () => {
             if (
                 currentColorIndex <
-                    FIXED_COLORS_START.length ||
+                FIXED_COLORS_START.length ||
                 currentColorIndex ===
-                    palette.length - 1
+                palette.length - 1
             ) {
                 alert(
                     window.i18nGetText(
@@ -770,15 +829,117 @@
                 return;
             }
 
+            const deletedIdx = currentColorIndex;
             palette.splice(
-                currentColorIndex,
+                deletedIdx,
                 1
             );
+            const newTransIdx = palette.length - 1;
+
+            // ピクセルのインデックスを更新：
+            // - 削除された色で塗られていたピクセルは透明に戻す
+            // - 削除された色より後ろのインデックスだったピクセルは 1 つ前に詰める
+            pixels.forEach(p => {
+                const idx = Number(p.dataset.colorIndex);
+                if (idx === deletedIdx) {
+                    p.dataset.colorIndex = newTransIdx;
+                    p.style.backgroundColor = "transparent";
+                } else if (idx > deletedIdx) {
+                    p.dataset.colorIndex = idx - 1;
+                }
+            });
 
             currentColorIndex = 0;
 
             createPalette();
+            updateEditButtonState();
             saveToLocal();
+        };
+    }
+
+    // --- 色編集 ---
+    if (editColorBtn) {
+        editColorBtn.onclick = () => {
+            // 追加色のみ編集可能
+            if (
+                currentColorIndex < FIXED_COLORS_START.length ||
+                currentColorIndex >= palette.length - 1
+            ) {
+                return;
+            }
+
+            const old = $("color-ui");
+
+            if (old) {
+                old.remove();
+            }
+
+            const ui =
+                document.createElement("div");
+
+            ui.id = "color-ui";
+
+            ui.style =
+                "position:fixed;" +
+                "top:50%;" +
+                "left:50%;" +
+                "transform:translate(-50%,-50%);" +
+                "background:#c0c0c0;" +
+                "border:2px outset;" +
+                "padding:12px;" +
+                "z-index:9999;" +
+                "display:flex;" +
+                "gap:5px";
+
+            const pk =
+                document.createElement("input");
+
+            pk.type = "color";
+            pk.value = palette[currentColorIndex];
+
+            pk.setAttribute(
+                "aria-label",
+                window.i18nGetText(
+                    "label-color-pick"
+                )
+            );
+
+            const btn =
+                document.createElement("button");
+
+            btn.textContent = "変更";
+
+            btn.onclick = () => {
+                palette[currentColorIndex] = pk.value;
+
+                // 描画済みピクセルの色も反映
+                pixels.forEach(p => {
+                    if (Number(p.dataset.colorIndex) === currentColorIndex) {
+                        p.style.backgroundColor = pk.value;
+                    }
+                });
+
+                createPalette();
+                updateEditButtonState();
+                saveToLocal();
+
+                ui.remove();
+            };
+
+            const cancel =
+                document.createElement("button");
+
+            cancel.textContent = "×";
+
+            cancel.onclick = () => {
+                ui.remove();
+            };
+
+            ui.appendChild(pk);
+            ui.appendChild(btn);
+            ui.appendChild(cancel);
+
+            document.body.appendChild(ui);
         };
     }
 
@@ -797,9 +958,20 @@
                     FIXED_COLOR_END
                 ];
 
+                const newTransIdx = palette.length - 1;
+                pixels.forEach(p => {
+                    const idx = Number(p.dataset.colorIndex);
+                    // 追加色または旧透明色だったピクセルは透明にリセット
+                    if (idx >= FIXED_COLORS_START.length) {
+                        p.dataset.colorIndex = newTransIdx;
+                        p.style.backgroundColor = "transparent";
+                    }
+                });
+
                 currentColorIndex = 0;
 
                 createPalette();
+                updateEditButtonState();
                 saveToLocal();
             }
         };
@@ -910,13 +1082,16 @@
                     }
 
                     applyLoadedData(d);
+                    updateEditButtonState();
                 }
                 catch {
                     createPalette();
+                    updateEditButtonState();
                 }
             }
             else {
                 createPalette();
+                updateEditButtonState();
             }
         }
     );
