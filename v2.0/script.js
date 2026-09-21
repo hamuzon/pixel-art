@@ -202,7 +202,8 @@
         sel.setAttribute("aria-label", window.i18nGetText("label-img-format"));
         ["png", "jpeg"].forEach(f => { const opt = document.createElement("option"); opt.value = f; opt.textContent = f.toUpperCase(); sel.appendChild(opt); });
         const btn = document.createElement("button");
-        btn.textContent = "保存";
+        btn.setAttribute("data-i18n", "btn-dialog-save");
+        btn.textContent = window.i18nGetText("btn-dialog-save");
         const close = document.createElement("button");
         close.textContent = "×";
         close.onclick = () => ui.remove();

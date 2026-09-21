@@ -202,7 +202,8 @@
         sel.setAttribute("aria-label", window.i18nGetText("label-img-format"));
         ["png", "jpeg"].forEach(f => { const opt = document.createElement("option"); opt.value = f; opt.textContent = f.toUpperCase(); sel.appendChild(opt); });
         const btn = document.createElement("button");
-        btn.textContent = "保存";
+        btn.setAttribute("data-i18n", "btn-dialog-save");
+        btn.textContent = window.i18nGetText("btn-dialog-save");
         const close = document.createElement("button");
         close.textContent = "×";
         close.onclick = () => ui.remove();
@@ -289,7 +290,9 @@
         ui.style = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#c0c0c0;border:2px outset;padding:12px;z-index:9999;display:flex;gap:5px";
         const pk = document.createElement("input"); pk.type = "color"; pk.value = "#000000";
         pk.setAttribute("aria-label", window.i18nGetText("label-color-pick"));
-        const btn = document.createElement("button"); btn.textContent = "追加";
+        const btn = document.createElement("button");
+        btn.setAttribute("data-i18n", "btn-dialog-add");
+        btn.textContent = window.i18nGetText("btn-dialog-add");
         btn.onclick = () => { palette.splice(palette.length - 1, 0, pk.value); currentColorIndex = palette.length - 2; createPalette(); saveToLocal(); ui.remove(); };
         const cancel = document.createElement("button"); cancel.textContent = "×";
         cancel.onclick = () => ui.remove();

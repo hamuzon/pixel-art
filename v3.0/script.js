@@ -547,7 +547,14 @@
             const btn =
                 document.createElement("button");
 
-            btn.textContent = "保存";
+            btn.setAttribute(
+                "data-i18n",
+                "btn-dialog-save"
+            );
+            btn.textContent =
+                window.i18nGetText(
+                    "btn-dialog-save"
+                );
 
             const close =
                 document.createElement("button");
@@ -766,7 +773,14 @@
             const btn =
                 document.createElement("button");
 
-            btn.textContent = "追加";
+            btn.setAttribute(
+                "data-i18n",
+                "btn-dialog-add"
+            );
+            btn.textContent =
+                window.i18nGetText(
+                    "btn-dialog-add"
+                );
 
             btn.onclick = () => {
                 const oldTransIdx = palette.length - 1;
@@ -907,7 +921,14 @@
             const btn =
                 document.createElement("button");
 
-            btn.textContent = "変更";
+            btn.setAttribute(
+                "data-i18n",
+                "btn-dialog-change"
+            );
+            btn.textContent =
+                window.i18nGetText(
+                    "btn-dialog-change"
+                );
 
             btn.onclick = () => {
                 palette[currentColorIndex] = pk.value;

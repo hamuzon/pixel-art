@@ -28,6 +28,9 @@ const appTranslations = {
     "btn-img-save": "画像保存",
     "label-img-format": "保存形式を選択",
     "label-color-pick": "色を選択",
+    "btn-dialog-add": "追加",
+    "btn-dialog-change": "変更",
+    "btn-dialog-save": "保存",
     
     // Alerts
     "alert-file-not-selected": "ファイルが選択されていません。",
@@ -71,6 +74,9 @@ const appTranslations = {
     "btn-img-save": "Save Image",
     "label-img-format": "Select save format",
     "label-color-pick": "Pick a color",
+    "btn-dialog-add": "Add",
+    "btn-dialog-change": "Change",
+    "btn-dialog-save": "Save",
 
     // Alerts
     "alert-file-not-selected": "No file selected.",

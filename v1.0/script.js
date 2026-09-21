@@ -203,7 +203,8 @@
     });
 
     const saveBtn = document.createElement("button");
-    saveBtn.textContent = "保存";
+    saveBtn.setAttribute("data-i18n", "btn-dialog-save");
+    saveBtn.textContent = window.i18nGetText("btn-dialog-save");
     saveBtn.style.marginLeft = "8px";
 
     const wrapper = document.createElement("div");
