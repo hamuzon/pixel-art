@@ -1,4 +1,3 @@
-
 # Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
@@ -17,7 +16,7 @@ permissions:
   id-token: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# However, do NOT cancel in-progress runs as we want these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -29,48 +28,53 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    env:
+      GA_MEASUREMENT_ID: G-F8HVYVW05H
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: 'main'
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Inject FQDN normalization script
-        run: |
-          # 全てのHTMLファイルの<head>直後に挿入
-          find . -maxdepth 1 -name "*.html" -not -name "google*.html" -exec sed -i '/<head>/a \  <script>if(window.location.hostname.endsWith(".")){window.location.replace(window.location.href.replace(window.location.hostname,window.location.hostname.slice(0,-1)));}</script>' {} +
-      - name: Inject Google Analytics
-        run: |
-          # Google Analyticsを全てのHTMLファイルの<head>直後に挿入
-          find . -maxdepth 1 -type f -name "*.html" ! -name "google*.html" -exec sh -c '
-            for file do
-              if grep -q "G-F8HVYVW05H" "$file"; then
-                echo "Google Analytics already exists: $file"
-                continue
-              fi
 
-              sed -i "/<head>/a\\
-          <script async src=\"https://www.googletagmanager.com/gtag/js?id=G-F8HVYVW05H\"></script>\\
+      - name: Inject Google Analytics 4
+        run: |
+          # google*.html を除外し、既存GA4タグがないHTMLに挿入
+          find . -type f -name "*.html" -not -name "google*.html" \
+            -exec sh -c '
+              for file do
+                if ! grep -q "googletagmanager.com/gtag/js" "$file"; then
+                  sed -i "/<head[^>]*>/a\\
+          <!-- Google tag (gtag.js) -->\\
+          <script async src=\"https://www.googletagmanager.com/gtag/js?id=$GA_MEASUREMENT_ID\"></script>\\
           <script>\\
           window.dataLayer = window.dataLayer || [];\\
           function gtag(){dataLayer.push(arguments);}\\
           gtag(\"js\", new Date());\\
-          gtag(\"config\", \"G-F8HVYVW05H\");\\
+          gtag(\"config\", \"$GA_MEASUREMENT_ID\");\\
           </script>" "$file"
+                fi
+              done
+            ' sh {} +
 
-              echo "Updated: $file"
-            done
-          ' sh {} +
+      - name: Inject FQDN normalization script
+        run: |
+          # 全てのHTMLファイルの<head>直後に挿入
+          find . -type f -name "*.html" -not -name "google*.html" -exec sed -i '/<head[^>]*>/a \  <script>if(window.location.hostname.endsWith(".")){window.location.replace(window.location.href.replace(window.location.hostname,window.location.hostname.slice(0,-1)));}</script>' {} +
+
       - name: Remove sensitive files from deployment artifact
         run: |
           # デプロイ対象から削除
           rm -rf functions README.md README readme.md license LICENSE LICENSE.txt _redirects.md _redirects
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
           path: '.'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
