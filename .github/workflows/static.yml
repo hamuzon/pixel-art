@@ -1,5 +1,5 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Sample workflow for building and deploying a Jekyll site to GitHub Pages
+name: Deploy Jekyll with GitHub Pages dependencies preinstalled
 
 on:
   # Runs on pushes targeting the default branch
@@ -9,6 +9,10 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# Google Analytics 4
+env:
+  GA_MEASUREMENT_ID: G-F8HVYVW05H
+
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
@@ -16,37 +20,39 @@ permissions:
   id-token: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want these production deployments to complete.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Build job
+  build:
     runs-on: ubuntu-latest
-    env:
-      GA_MEASUREMENT_ID: G-F8HVYVW05H
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: 'main'
+        uses: actions/checkout@v7
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
-      - name: Inject Google Analytics 4
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+
+      - name: Inject GA4 and normalization script into HTML
         run: |
-          # google*.html を除外し、既存GA4タグがないHTMLに挿入
-          find . -type f -name "*.html" -not -name "google*.html" \
+          sudo chown -R "$USER:$USER" ./_site
+          cd ./_site
+
+          # GA4タグを挿入（google*.html と既存GA4タグのあるHTMLは除外）
+          find . -maxdepth 1 -type f -name "*.html" -not -name "google*.html" \
             -exec sh -c '
               for file do
                 if ! grep -q "googletagmanager.com/gtag/js" "$file"; then
-                  sed -i "/<head[^>]*>/a\\
+                  sed -i "/<head>/a\\
           <!-- Google tag (gtag.js) -->\\
           <script async src=\"https://www.googletagmanager.com/gtag/js?id=$GA_MEASUREMENT_ID\"></script>\\
           <script>\\
@@ -59,22 +65,29 @@ jobs:
               done
             ' sh {} +
 
-      - name: Inject FQDN normalization script
-        run: |
-          # 全てのHTMLファイルの<head>直後に挿入
-          find . -type f -name "*.html" -not -name "google*.html" -exec sed -i '/<head[^>]*>/a \  <script>if(window.location.hostname.endsWith(".")){window.location.replace(window.location.href.replace(window.location.hostname,window.location.hostname.slice(0,-1)));}</script>' {} +
+          # 全てのHTMLファイルの<head>直後に正規化スクリプトを挿入
+          find . -maxdepth 1 -type f -name "*.html" -not -name "google*.html" \
+            -exec sed -i '/<head>/a \  <script>if(window.location.hostname.endsWith(".")){window.location.replace(window.location.href.replace(window.location.hostname,window.location.hostname.slice(0,-1)));}</script>' {} +
 
       - name: Remove sensitive files from deployment artifact
         run: |
           # デプロイ対象から削除
+          cd ./_site
           rm -rf functions README.md README readme.md license LICENSE LICENSE.txt _redirects.md _redirects
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
-          # Upload entire repository
-          path: '.'
+          path: ./_site
 
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
